@@ -1,5 +1,3 @@
-好的，以下是可以直接复制粘贴的文本格式，并且将“第二届”修改为“2025”：
-
 ```markdown
 # HACKDKU--SSA-Financial-Race
 
