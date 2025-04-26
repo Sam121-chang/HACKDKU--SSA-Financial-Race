@@ -109,9 +109,14 @@ if mode == "📈 投资组合优化 (Portfolio Optimization)":
         for stock in optimized_portfolio:
             optimized_portfolio[stock] /= total
 
+        # 将投资比例限制在小数点后四位
+        for stock in optimized_portfolio:
+            optimized_portfolio[stock] = round(optimized_portfolio[stock], 4)
+
         # 显示优化结果 (Display optimized investment portfolio)
         st.subheader('投资优化组合结果 (Optimized Investment Portfolio)')
-        st.table(pd.DataFrame(list(optimized_portfolio.items()), columns=["股票代码 (Stock)", "投资比例 (Investment Ratio)"]))
+        result_df = pd.DataFrame(list(optimized_portfolio.items()), columns=["股票代码 (Stock)", "投资比例 (Investment Ratio)"])
+        st.table(result_df.style.format({'投资比例 (Investment Ratio)': '{:.4f}'}))  # 保留4位小数
 
         # 绘制投资分布饼图 (Plot investment distribution pie chart)
         fig, ax = plt.subplots()
@@ -162,19 +167,4 @@ elif mode == "🛡️ 欺诈检测 (Fraud Detection)":
             prediction_df['真实是否欺诈 (Actual Fraud)'] = y_test.values
             prediction_df['预测是否欺诈 (Predicted Fraud)'] = y_pred
             prediction_df['预测结果 (Prediction Result)'] = np.where(
-                prediction_df['预测是否欺诈 (Predicted Fraud)'] == 1, '欺诈', '正常')
-
-            # 只显示重要字段 (Only show key columns)
-            display_df = prediction_df[['amount', '真实是否欺诈 (Actual Fraud)', '预测是否欺诈 (Predicted Fraud)',
-                                        '预测结果 (Prediction Result)']]
-
-
-            # 使用条件格式 (Use conditional formatting)
-            def highlight_fraud(row):
-                if row['预测是否欺诈 (Predicted Fraud)'] == 1:
-                    return ['background-color: lightcoral'] * len(row)
-                else:
-                    return [''] * len(row)
-
-
-            st.dataframe(display_df.style.apply(highlight_fraud, axis=1))
+                prediction_df['预测是否欺诈 (Predicted Fraud)'] == 1, '
