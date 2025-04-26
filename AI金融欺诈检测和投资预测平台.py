@@ -214,9 +214,9 @@ if mode == "📈 投资组合优化 | Portfolio":
             if not returns.empty:
                 st.subheader('初始化投资组合优化环境... | Initializing portfolio optimization environment...')
                 agent = PortfolioOptimizationAgent(
-                    n_stocks=len(selected_stocks), 
-                    n_actions=len(selected_stocks)
-                
+    n_stocks=len(selected_stocks),  
+    n_actions=len(selected_stocks) 
+                    
                 # 训练进度条 | Training progress bar
                 progress_bar = st.progress(0)
                 status_text = st.empty()
