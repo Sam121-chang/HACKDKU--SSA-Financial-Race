@@ -1,72 +1,90 @@
 # AI金融欺诈检测与投资预测平台  
-# AI Financial Fraud Detection and Investment Prediction Platform
+**AI Financial Fraud Detection and Investment Prediction Platform**
 
-## 📖 项目简介 | Project Description
+## 📚 项目简介 | Project Introduction
+本项目基于Python开发，通过Streamlit搭建交互式界面，集成了：
+- 📈 投资组合优化（使用Q-Learning强化学习）
+- 🛡️ 金融欺诈检测（使用随机森林分类器）
 
-本项目是一个基于机器学习（Random Forest）和强化学习（Q-Learning）的金融应用平台，支持：
-- **投资组合优化**：通过Q-Learning智能体优化多支股票的投资比例。
-- **金融欺诈检测**：使用随机森林模型检测交易数据中的潜在欺诈行为。
-
-This project is a financial application platform based on Machine Learning (Random Forest) and Reinforcement Learning (Q-Learning), supporting:
-- **Portfolio Optimization**: Optimize stock investment ratios using a Q-Learning agent.
-- **Fraud Detection**: Detect potential frauds in transaction data using a Random Forest model.
-
----
-
-## 🚀 快速开始 | Quick Start
-
-### 安装依赖 | Install Dependencies
-
-```bash
-pip install streamlit yfinance pandas numpy scikit-learn matplotlib
-```
-
-### 运行项目 | Run the Project
-
-```bash
-streamlit run app.py
-```
-
-> 请确保你将以上代码保存为 `app.py` 文件。  
-> Make sure you save the code above as an `app.py` file.
+This project, developed in Python and Streamlit, includes:
+- 📈 Portfolio Optimization (via Q-Learning Reinforcement Learning)
+- 🛡️ Financial Fraud Detection (via Random Forest Classifier)
 
 ---
 
-## 📈 功能模块 | Features
+## 🛠️ 使用到的主要库 | Main Dependencies
+```python
+# -*- coding: utf-8 -*-
+import streamlit as st
+import yfinance as yf
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import LabelEncoder
+```
 
-### 1. 投资组合优化 | Portfolio Optimization
-- 输入感兴趣的股票代码（如：AAPL, MSFT, TSLA）
-- 使用Q-Learning方法学习和分配投资比例
-- 可视化优化后的投资组合及分布
+### 📦 安装依赖 | Install Dependencies
+```bash
+pip install streamlit yfinance pandas numpy matplotlib scikit-learn
+```
 
-### 2. 金融欺诈检测 | Financial Fraud Detection
-- 上传包含交易记录的CSV文件（文件中必须包含 `fraud` 列）
-- 自动训练随机森林分类器
-- 预测交易是否为欺诈行为，准确率评估与高亮显示结果
+---
+
+## 🚀 功能介绍 | Features
+
+### 📈 投资组合优化 (Portfolio Optimization)
+- 输入多个股票代码（如：AAPL, MSFT, TSLA）
+- 下载历史收盘价数据
+- 使用Q-Learning训练投资组合分配策略
+- 输出优化后的股票投资比例，并以饼图形式展示
+
+**流程 | Workflow**:
+1. 用户输入股票代码
+2. 自动拉取历史数据
+3. Q-Learning强化学习智能体进行训练
+4. 输出投资建议和可视化图表
+
+---
+
+### 🛡️ 欺诈检测 (Fraud Detection)
+- 上传包含交易数据的CSV文件（必须包含`fraud`列）
+- 使用随机森林模型进行训练与预测
+- 输出模型准确率
+- 显示预测结果，并高亮标注欺诈交易
+
+**流程 | Workflow**:
+1. 上传交易记录文件
+2. 自动训练并测试模型
+3. 展示预测结果与准确率
+4. 以表格高亮显示检测出的欺诈行为
 
 ---
 
 ## 📂 文件结构 | File Structure
-
-```
-├── app.py             # 主程序 Main application
-├── README.md          # 项目说明 Project description
-└── requirements.txt   # （可选）依赖列表 Optional dependency list
+```text
+.
+├── main_app.py           # 主程序文件 Main Application File
+├── README.md             # 项目说明文档 This README
+└── (其他文件)            # Other project files
 ```
 
 ---
 
-## 📋 注意事项 | Notes
-
-- 欺诈检测模块要求上传的CSV文件中必须包含 `fraud` 字段。
-- 投资组合优化模块目前基于历史数据，不代表未来收益，仅供学习参考。
-- 本平台为教育与展示用途，**不构成投资建议**。
+## ▶️ 如何运行 | How to Run
+```bash
+streamlit run main_app.py
+```
+运行后会自动打开浏览器访问本地地址，如：http://localhost:8501  
+After running, your browser will open at a local address like: http://localhost:8501
 
 ---
 
 ## 📄 许可证 | License
 
-This project is licensed under the MIT License.  
-此项目采用 MIT License 开源协议。
+This project is licensed under the **MIT License**.  
+此项目采用 **MIT License** 开源协议。
 
 ---
