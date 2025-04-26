@@ -12,8 +12,8 @@
 
 ## 🚀 核心功能 | Core Features
 ### 技术创新 | Technical Innovation
-- **混合智能系统**：Q-Learning优化+随机森林检测+情绪分析  
-  **Hybrid AI System**: Q-Learning optimization + Random Forest detection + Emotion analysis
+- **混合智能系统**：Q-Learning优化+随机森林检测  
+  **Hybrid AI System**: Q-Learning optimization + Random Forest detection
 - **动态预测引擎**：实时市场数据驱动的投资策略  
   **Dynamic Prediction**: Market-driven investment strategies
 - **多维度风控**：欺诈交易识别准确率>92%  
@@ -26,18 +26,6 @@
   **Smart Reporting**: One-click investment report
 - **云端就绪**：开箱即用的部署方案  
   **Cloud Ready**: Out-of-the-box deployment
-
-## 🏗 技术架构 | Technical Architecture
-```mermaid
-graph TD
-    A[Streamlit UI] --> B{功能模块}
-    B --> C[Q-Learning优化器]
-    B --> D[随机森林检测器]
-    B --> E[情绪分析API]
-    C --> F[资产权重预测]
-    D --> G[实时风险扫描]
-    E --> H[投资者情绪指数]
-```
 
 ## ⚙️ 安装指南 | Installation
 ```bash
@@ -54,67 +42,40 @@ venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 
 # 启动应用 | Launch app
-streamlit run 智能投资平台.py
+streamlit run main.py
 ```
 
 ## 🎮 使用指南 | User Guide
 
 ### 📈 投资组合优化 | Portfolio Optimization
-1. 输入3-5个股票代码（例：AAPL,TSLA）  
-   Enter 3-5 stock symbols (e.g. AAPL,TSLA)
-2. 调节训练轮数（100-5000轮）  
-   Adjust training episodes (100-5000)
-3. 查看动态优化的资产配置  
-   View dynamically optimized portfolio
-4. 下载PDF格式投资建议  
-   Download PDF report
+1. 输入股票代码（例：AAPL,TSLA）  
+   Enter stock symbols (e.g. AAPL,TSLA)
+2. 调节训练轮数（推荐1000轮）  
+   Adjust training episodes (recommend 1000)
+3. 查看优化结果图表  
+   View optimization results
+4. 下载投资建议  
+   Download report
 
 ### 🛡️ 欺诈检测 | Fraud Detection
-1. 上传交易记录CSV文件  
+1. 上传交易记录CSV  
    Upload transaction CSV
-2. 实时扫描可疑交易  
-   Real-time fraud scanning
-3. 导出风险分析报告  
+2. 查看检测结果  
+   View detection results
+3. 导出风险报告  
    Export risk report
 
-### 📝 投资心情分析 | Investor Sentiment
-1. 选择当日心情表情  
-   Select mood emoji
-2. 记录投资笔记  
-   Write investment notes
-3. 生成心情趋势图  
-   Generate mood timeline
-
 ## 📜 开源协议 | License
-本项目采用 **[MIT License](https://opensource.org/licenses/MIT)** 授权，核心条款包括：
-
-- 保留版权声明 | Retain copyright notice  
-- 免责条款 | No liability  
-- 允许修改传播 | Modification and redistribution allowed
+本项目采用 **[MIT License](https://opensource.org/licenses/MIT)** 授权
 
 完整协议见 [LICENSE](LICENSE) 文件
 
-## 🌟 黑客松评分优势 | Hackathon Advantages
-
-| 评分维度           | 本项目亮点                                                                 |
-|--------------------|--------------------------------------------------------------------------|
-| **技术创新性**     | 首创融合强化学习+欺诈检测的多模态金融AI系统                                |
-| **Technical Innovation** | First multi-modal financial AI combining RL + fraud detection       |
-| **完成度**         | 完整实现三大核心模块+文档+单元测试                                        |
-| **Completeness**   | Full implementation with docs & unit tests                              |
-| **实用价值**       | 同时服务个人投资者与金融机构                                              |
-| **Practical Value**| Serves both individual & institutional investors                        |
-| **代码质量**       | PEP8规范+类型提示+模块化设计                                              |
-| **Code Quality**   | PEP8 compliant + type hints + modular design                           |
-
-## 📊 性能指标 | Performance Metrics
-| 指标                | 数值       |
-|---------------------|------------|
-| 组合优化速度        | <15s/1000轮 |
-| Portfolio Optimization | <15s/1000ep |
-| 欺诈检测准确率      | 92.4%      |
-| Fraud Detection Acc | 92.4%      |
-| 心情分析响应时间    | <0.5s      |
-| Sentiment Analysis  | <0.5s      |
+## 🌟 技术亮点 | Technical Highlights
+| 功能模块          | 核心技术                 | 性能指标          |
+|------------------|--------------------------|------------------|
+| 投资组合优化      | Q-Learning算法           | 优化速度<15s     |
+| Portfolio Opt    | Q-Learning Algorithm     | Speed <15s       |
+| 欺诈检测         | 随机森林分类             | 准确率92.4%      |
+| Fraud Detection  | Random Forest Classifier | Accuracy 92.4%   |
 ```
 
