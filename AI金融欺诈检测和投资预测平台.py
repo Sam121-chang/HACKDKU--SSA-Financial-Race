@@ -106,18 +106,20 @@ if mode == "📈 投资组合优化 (Portfolio Optimization)":
         st.subheader('投资优化组合结果 (Optimized Investment Portfolio)')
         st.table(pd.DataFrame(list(optimized_portfolio.items()), columns=["股票代码 (Stock)", "投资比例 (Investment Ratio)"]))
 
-        # 绘制投资分布饼图 (Plot investment distribution pie chart)
-        fig, ax = plt.subplots()
-        ax.pie(optimized_portfolio.values(), labels=optimized_portfolio.keys(), autopct='%1.1f%%', startangle=90)
-        ax.axis('equal')  # 保持饼图为正圆形 (Ensure pie is a circle)
-        st.pyplot(fig)
+        # 计算并显示投资组合的期望收益率和风险 (Calculate and display portfolio expected return and risk)
+        expected_return = calculate_portfolio_return(list(optimized_portfolio.values()), returns.mean())
+        portfolio_risk = np.sqrt(np.dot(list(optimized_portfolio.values()), np.dot(returns.cov(), list(optimized_portfolio.values()))))
+
+        st.subheader('投资组合统计分析 (Portfolio Statistics)')
+        st.write(f'期望年收益率: {expected_return:.2%}')  # Expected annual return
+        st.write(f'年化波动率 (风险): {portfolio_risk:.2%}')  # Annualized volatility (Risk)
 
         # 显示彩带 (Show balloons)
         st.balloons()
 
 # 欺诈检测模块 (Fraud Detection Module)
 elif mode == "🛡️ 欺诈检测 (Fraud Detection)":
-    st.header('🛡️ 欺诈检测 (Fraud Detection)')
+    st.header('🛡️ 欺诈检测 (Fra Fraud Detection)')
 
     # 上传CSV文件 (Upload CSV file)
     uploaded_file = st.file_uploader("上传包含交易记录的CSV文件 (Upload CSV file with transactions)", type=["csv"])
@@ -160,4 +162,5 @@ elif mode == "🛡️ 欺诈检测 (Fraud Detection)":
             # 只显示重要字段 (Only show key columns)
             display_df = prediction_df[['amount', '真实是否欺诈 (Actual Fraud)', '预测是否欺诈 (Predicted Fraud)',
                                         '预测结果 (Prediction Result)']]
-            st.write(display_df)
+
+            st.dataframe(display_df)  # 显示欺诈检测预测表格
