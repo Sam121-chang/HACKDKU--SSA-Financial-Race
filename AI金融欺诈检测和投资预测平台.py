@@ -1,82 +1,174 @@
-import tweepy
+# -*- coding: utf-8 -*-
+
+# 导入必要的库 (Import required libraries)
+import streamlit as st
 import yfinance as yf
 import pandas as pd
-import streamlit as st
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import LabelEncoder
 
-# 填入你的 API 凭证
-# Insert your API credentials 
-bearer_token = 'AAAAAAAAAAAAAAAAAAAAAAZ30wEAAAAAh6g84WnqJCuDNMF2CdniOiq6cMM%3DzkQcOhitxK49i8Nvlt7E1JfF22ESmqX1qyNqsjihc7ELaOQvcM'
+# 定义Q-Learning智能体 (Define the Q-Learning agent)
+class PortfolioOptimizationAgent:
+    def __init__(self, n_stocks, n_actions, learning_rate=0.1, discount_factor=0.95, exploration_rate=1.0, exploration_decay=0.995):
+        self.n_stocks = n_stocks  # 股票数量 (Number of stocks)
+        self.n_actions = n_actions  # 每个状态可采取的动作数量 (Number of actions per state)
+        self.q_table = np.random.rand(500, n_actions)  # 初始化Q表 (Initialize Q-table with random values)
+        self.learning_rate = learning_rate  # 学习率 (Learning rate)
+        self.discount_factor = discount_factor  # 折扣因子 (Discount factor)
+        self.exploration_rate = exploration_rate  # 探索率 (Exploration rate)
+        self.exploration_decay = exploration_decay  # 探索率衰减 (Exploration decay)
 
-# 创建 Tweepy 客户端实例
-# Creat a Tweepy client instance
-client = tweepy.Client(bearer_token)
-
-
-# 定义获取 Twitter 数据的函数
-# Define the function to fetch Twitter data
-def fetch_twitter_data(query, count=100):
-    try:
-        # 使用 API v2 的搜索端点获取推文
-        # Use the API v2 search endpoint to fetch tweets
-        tweets = client.search_recent_tweets(query=query, max_results=count)
-        tweet_data = []
-
-        # 如果有推文数据，解析并存储
-        # If there are tweets, parse and store them
-        if tweets.data:
-            for tweet in tweets.data:
-                tweet_data.append({
-                    'created_at': tweet.created_at, #推文的创建时间 / The creation time of the tweet
-                    'text': tweet.text, #推文内容 / The content of the tweet
-                    'author_id': tweet.author_id, #推文作者的 ID / The author ID of the tweet
-                })
+    def select_action(self, state):
+        # 根据探索率选择动作 (Choose action based on exploration rate)
+        if np.random.rand() < self.exploration_rate:
+            return np.random.randint(self.n_actions)  # 随机选择动作 (Random action)
         else:
-            print("未找到相关推文。") # If no tweets founds, print message
-        return pd.DataFrame(tweet_data) # Return tweet data as a pandas DataFrame
-    except tweepy.TweepyException as e:
-        print(f"发生错误: {e}") # If an error occurs, print error message
-        return pd.DataFrame() # Return empty DataFrame on error
+            return np.argmax(self.q_table[int(state)])  # 选择Q值最大的动作 (Action with highest Q-value)
 
+    def update_q_value(self, state, action, reward, next_state):
+        # 更新Q值 (Update Q-value)
+        if int(next_state) >= self.q_table.shape[0]:
+            next_state = self.q_table.shape[0] - 1
+        max_future_q = np.max(self.q_table[int(next_state)])  # 下一个状态的最大Q值 (Max Q-value for next state)
+        current_q = self.q_table[int(state)][action]  # 当前Q值 (Current Q-value)
+        # Q学习更新公式 (Q-learning update formula)
+        new_q = (1 - self.learning_rate) * current_q + self.learning_rate * (reward + self.discount_factor * max_future_q)
+        self.q_table[int(state)][action] = new_q  # 更新Q表 (Update Q-table)
+        self.exploration_rate *= self.exploration_decay  # 衰减探索率 (Decay exploration rate)
 
-# 获取某支股票的历史数据（示例：苹果公司股票数据）
-# Fetch historical stock data for a given ticker (example: Apple stock data)
-def fetch_stock_data(ticker):
-    stock_data = yf.download(ticker, period='1y', interval='1d')
-    return stock_data
+# 计算投资组合收益 (Calculate portfolio return)
+def calculate_portfolio_return(weights, returns):
+    return np.sum(weights * returns)  # 投资组合总收益 (Total portfolio return)
 
+# 页面标题 (Page title)
+st.title('AI金融欺诈检测与投资预测平台 (AI Financial Fraud Detection and Investment Prediction Platform)')
 
-# 主函数
-# Main function
-def main():
-    st.title("AI金融欺诈检测和投资预测平台") # Streamlit app title
+# 侧边栏选择功能 (Sidebar selection)
+st.sidebar.title("功能选择 (Function Selection)")
+mode = st.sidebar.radio("请选择功能 (Please select function)", ("📈 投资组合优化 (Portfolio Optimization)", "🛡️ 欺诈检测 (Fraud Detection)"))
 
-    # Twitter 数据部分
-    # Twitter Data Section
-    query = st.text_input("请输入Twitter关键词", "Apple") # User input for Twitter search query
-    num_tweets = st.slider("选择获取的推文数量", 10, 200, 100) # Slider to select number of tweets to fetch
+# 投资组合优化模块 (Portfolio Optimization Module)
+if mode == "📈 投资组合优化 (Portfolio Optimization)":
+    st.header('📈 投资组合优化 (Portfolio Optimization)')
 
-    # 如果输入了查询关键词，则调用 fetch_twitter_data 函数获取推文数据
-    # If a query is entered, fetch tweets using fetch_twitter_data function
-    if query:
-        tweets = fetch_twitter_data(query, num_tweets) # Call functionto get tweets
-        if not tweets.empty: # If there are tweets, display them
-            st.write(f"展示最新的 {num_tweets} 条关于 '{query}' 的推文:") # Display message for the tweets fetched
-            st.dataframe(tweets) # Display tweets in a table format
+    # 股票代码输入 (Input stock symbols)
+    stock_symbols = st.text_input('输入股票代码（用逗号分隔，如AAPL,MSFT,TSLA） (Enter stock symbols, comma separated)', 'AAPL,MSFT,TSLA')
+    selected_stocks = [symbol.strip() for symbol in stock_symbols.split(',')]
+
+    if selected_stocks:
+        # 下载股票数据 (Download stock data)
+        data = yf.download(selected_stocks, start='2022-01-01', end='2024-01-01')
+        closing_prices = data['Close']  # 收盘价数据 (Closing prices)
+
+        # 显示股票价格走势图 (Show stock price chart)
+        st.subheader('股票价格走势 (Stock Price Trend)')
+        st.line_chart(closing_prices)
+
+        # 计算每日收益率 (Calculate daily returns)
+        returns = closing_prices.pct_change().dropna()
+
+        # 初始化Q-Learning智能体 (Initialize Q-Learning agent)
+        st.subheader('初始化投资组合优化环境... (Initializing portfolio optimization environment...)')
+        agent = PortfolioOptimizationAgent(n_stocks=len(selected_stocks), n_actions=len(selected_stocks))
+
+        # 开始训练Q-Learning智能体 (Start training the agent)
+        st.subheader('训练中... (Training...)')
+        num_episodes = 500  # 训练轮数 (Number of training episodes)
+        initial_state = 0
+
+        for episode in range(num_episodes):
+            state = initial_state
+            for i in range(len(returns) - 1):
+                action = agent.select_action(state)  # 选择动作 (Select action)
+                reward = returns.iloc[i, action]  # 当前动作的收益 (Reward for the action)
+                next_state = state + 1
+                agent.update_q_value(state, action, reward, next_state)  # 更新Q值 (Update Q-value)
+                state = next_state
+            if (episode + 1) % 100 == 0:
+                st.text(f'训练中...第 {episode+1}/{num_episodes} 次训练 (Training... {episode+1}/{num_episodes})')
+
+        st.success('投资组合优化完成！(Portfolio optimization completed!)')
+
+        # 生成优化后的投资组合 (Generate optimized investment portfolio)
+        optimized_portfolio = {}
+        for i, stock in enumerate(selected_stocks):
+            optimized_portfolio[stock] = agent.q_table[-1][i]
+
+        # 归一化投资比例 (Normalize investment ratios)
+        total = sum(optimized_portfolio.values())
+        for stock in optimized_portfolio:
+            optimized_portfolio[stock] /= total
+
+        # 显示优化结果 (Display optimized investment portfolio)
+        st.subheader('投资优化组合结果 (Optimized Investment Portfolio)')
+        st.table(pd.DataFrame(list(optimized_portfolio.items()), columns=["股票代码 (Stock)", "投资比例 (Investment Ratio)"]))
+
+        # 绘制投资分布饼图 (Plot investment distribution pie chart)
+        fig, ax = plt.subplots()
+        ax.pie(optimized_portfolio.values(), labels=optimized_portfolio.keys(), autopct='%1.1f%%', startangle=90)
+        ax.axis('equal')  # 保持饼图为正圆形 (Ensure pie is a circle)
+        st.pyplot(fig)
+
+        # 显示彩带 (Show balloons)
+        st.balloons()
+
+# 欺诈检测模块 (Fraud Detection Module)
+elif mode == "🛡️ 欺诈检测 (Fraud Detection)":
+    st.header('🛡️ 欺诈检测 (Fraud Detection)')
+
+    # 上传CSV文件 (Upload CSV file)
+    uploaded_file = st.file_uploader("上传包含交易记录的CSV文件 (Upload CSV file with transactions)", type=["csv"])
+
+    if uploaded_file is not None:
+        # 读取数据 (Read data)
+        data = pd.read_csv(uploaded_file)
+        st.write("数据预览 (Data Preview):")
+        st.dataframe(data.head())
+
+        if 'fraud' not in data.columns:
+            st.error('CSV文件必须包含“fraud”列 (CSV must include "fraud" column).')
         else:
-            st.write("未找到相关推文。") # If no tweets are found, display a message
+            X = data.drop('fraud', axis=1)  # 特征 (Features)
+            y = data['fraud']  # 标签 (Labels)
 
-    # 股票数据部分
-    # Stock Data Section
-    ticker = st.text_input("请输入股票代码（例如：AAPL）", "AAPL") # User input for stock ticker
-# 如果输入了股票代码，则调用 fetch_stock_data 函数获取股票数据
-# If a ticker is entered, fetch stock data using fetch_stock_data function    
-    if ticker:
-        stock_data = fetch_stock_data(ticker) # Call function to get stock data
-        st.write(f"{ticker} 股票的历史数据:") # Display message for the stock data
-        st.line_chart(stock_data['Close']) # Plot a line chart of the closing prices
+            # 拆分训练集和测试集 (Split into train and test sets)
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+            # 训练随机森林模型 (Train Random Forest model)
+            model = RandomForestClassifier()
+            model.fit(X_train, y_train)
+
+            # 预测与评估 (Prediction and evaluation)
+            y_pred = model.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+
+            st.success(f"欺诈检测模型训练完成！准确率：{accuracy:.2%} (Fraud detection model trained! Accuracy: {accuracy:.2%})")
+
+            # 显示欺诈检测预测结果 (Display fraud detection results)
+            st.subheader("欺诈检测预测结果 (Fraud Detection Predictions)")
+
+            # 创建结果表格 (Create result dataframe)
+            prediction_df = X_test.copy()
+            prediction_df['真实是否欺诈 (Actual Fraud)'] = y_test.values
+            prediction_df['预测是否欺诈 (Predicted Fraud)'] = y_pred
+            prediction_df['预测结果 (Prediction Result)'] = np.where(
+                prediction_df['预测是否欺诈 (Predicted Fraud)'] == 1, '欺诈', '正常')
+
+            # 只显示重要字段 (Only show key columns)
+            display_df = prediction_df[['amount', '真实是否欺诈 (Actual Fraud)', '预测是否欺诈 (Predicted Fraud)',
+                                        '预测结果 (Prediction Result)']]
 
 
-# 运行 Streamlit 应用
-# Run the Streamlit app
-if __name__ == "__main__":
-    main() # Call the main function to run the app / 调用主函数运行应用
+            # 使用条件格式 (Use conditional formatting)
+            def highlight_fraud(row):
+                if row['预测是否欺诈 (Predicted Fraud)'] == 1:
+                    return ['background-color: lightcoral'] * len(row)
+                else:
+                    return [''] * len(row)
+
+
+            st.dataframe(display_df.style.apply(highlight_fraud, axis=1))
