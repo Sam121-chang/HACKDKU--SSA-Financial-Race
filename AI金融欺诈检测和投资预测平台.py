@@ -64,21 +64,25 @@ if mode == "📈 投资组合优化 (Portfolio Optimization)":
     selected_stocks = [symbol.strip() for symbol in stock_symbols.split(',')]
 
     if selected_stocks:
-       # 下载股票数据 (Download stock data)
+        # 下载股票数据 (Download stock data)
         data = yf.download(selected_stocks, start='2022-01-01', end='2024-01-01')
 
-        # 输出检查下载的数据 (Output to check the downloaded data)
-        st.write(data.head())  # 检查数据是否正确
-
-        # 收盘价数据 (Closing prices)
+        # 获取收盘价数据 (Get closing prices)
         closing_prices = data['Close']
 
-        # 再次检查数据 (Check closing_prices)
-        st.write(closing_prices.head())  # 检查是否提取了收盘价数据
+        # 确保时间索引正确 (Ensure the time index is correct)
+        closing_prices = closing_prices.reset_index()  # 如果索引没有正确设置，重置索引
 
-        # 绘制股票价格走势图 (Show stock price chart)
-        st.subheader('股票价格走势 (Stock Price Trend)')
-        st.line_chart(closing_prices)        
+        # 输出检查 (Check the data)
+        st.write(closing_prices.head())
+
+        # 确保数据格式正确 (Ensure data format)
+        if not closing_prices.empty:
+            # 绘制股票价格走势图 (Show stock price chart)
+            st.subheader('股票价格走势 (Stock Price Trend)')
+            st.line_chart(closing_prices.set_index('Date'))  # 使用日期作为x轴，确保使用正确的时间索引
+        else:
+            st.error('无法加载股市数据，请检查股票代码或网络连接。')
         # 计算每日收益率 (Calculate daily returns)
         returns = closing_prices.pct_change().dropna()
 
