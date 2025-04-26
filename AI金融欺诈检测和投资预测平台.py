@@ -113,6 +113,19 @@ if mode == "📈 投资组合优化":
         # 绘制历史表现图表
         st.subheader('投资组合的历史表现')
 
+        # 直接简单平均持有所有股票
+        equal_weights = np.array([1 / len(selected_stocks)] * len(selected_stocks))
+        portfolio_returns_equal = returns.dot(equal_weights)
+        cumulative_returns_equal = (1 + portfolio_returns_equal).cumprod()
+    
+        fig, ax = plt.subplots()
+        ax.plot(cumulative_returns_equal, label='等权投资组合累计回报', color='blue')
+        ax.set_xlabel('日期')
+        ax.set_ylabel('累计回报')
+        ax.set_title('投资组合的历史表现（等权重）')
+        ax.legend()
+        st.pyplot(fig)
+
         # 模拟投资组合的回报
         portfolio_weights = np.array(list(optimized_portfolio.values()))
         portfolio_returns = returns.dot(portfolio_weights)
