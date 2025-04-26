@@ -1,147 +1,111 @@
+以下是中英双语版本的 `README.md`，包括项目的功能、安装与运行步骤、技术栈等内容，适合直接复制到你的 GitHub 仓库中：
+
 ```markdown
-# AI Financial Fraud Detection & Investment Prediction Platform
+# AI Financial Fraud Detection and Investment Prediction Platform  
+AI金融欺诈检测和投资预测平台  
 
-This is a Streamlit-based platform for financial fraud detection and investment prediction. The application uses real-time Twitter data and historical stock data to provide insights into financial markets. The goal of this project is to predict potential market trends and provide a simple interface to monitor financial data.
+This is an AI-based financial fraud detection and investment prediction platform that aims to predict financial market trends using social media data and stock market data. The platform utilizes Twitter data for market sentiment analysis, combined with historical stock data for predictions, helping users make better investment decisions.  
+这是一个基于人工智能的金融欺诈检测和投资预测平台，旨在利用社交媒体数据和股市数据来预测金融市场走势。该平台使用 Twitter 数据进行市场情绪分析，结合股市历史数据进行预测，帮助用户在投资决策中做出更明智的选择。
 
-这是一个基于Streamlit的金融欺诈检测与投资预测平台。该应用程序使用实时Twitter数据和历史股票数据，提供关于金融市场的洞察。该项目的目标是预测潜在的市场趋势，并提供一个简单的界面来监控金融数据。
+## Features  
+## 功能  
 
----
+- Fetch Twitter data based on specified keywords to analyze social media sentiment.  
+- 根据指定关键词获取 Twitter 数据，分析社交媒体情绪。  
+- Display historical stock data of specified stocks and plot price trends.  
+- 显示指定股票的历史数据并绘制价格变化图。  
+- Supports real-time data fetching to show the most relevant market information.  
+- 支持实时获取数据，展示最相关的市场信息。  
 
-## Features / 功能
+## Installation and Running Instructions  
+## 安装与运行说明  
 
-- **Twitter Data Integration**: Fetch recent tweets based on keywords.
-- **股票数据集成**：获取基于股票代码的历史数据。
-- **Real-time Financial Insights**: Display Twitter data and stock prices.
-- **实时金融数据展示**：展示Twitter数据和股票价格。
+### 1. Clone the Repository  
+### 1. 克隆仓库  
 
----
+First, clone this GitHub repository to your local machine:  
+首先，克隆此 GitHub 仓库到本地：  
+```bash  
+git clone https://github.com/Sam121-chang/HACKDKU--SSA-Financial-Race.git  
+cd HACKDKU--SSA-Financial-Race  
+```  
 
-## Prerequisites / 环境要求
+### 2. Install Dependencies  
+### 2. 安装依赖  
 
-- Python 3.8 or later / Python 3.8 或更高版本
-- pip (Python package manager) / pip（Python包管理器）
+This project is written in Python and uses libraries like `Streamlit`, `Tweepy`, and `yfinance`. You can install the dependencies with `pip`:  
+此项目使用 Python 编写，使用了 `Streamlit`、`Tweepy` 和 `yfinance` 等库。你可以使用 `pip` 安装所有依赖项：  
+```bash  
+pip install -r requirements.txt  
+```  
 
----
+### 3. Set Up Twitter API  
+### 3. 配置 Twitter API  
 
-## Installation / 安装
+To fetch Twitter data, you need to configure your Twitter API credentials. Follow these steps to get your API keys:  
+要从 Twitter 获取数据，你需要配置 Twitter API 凭证。请按照以下步骤获取你的 API 密钥：  
 
-1. **Clone the repository** / 克隆仓库
+1. Visit [Twitter Developer](https://developer.twitter.com/) and apply for a developer account.  
+1. 前往 [Twitter Developer](https://developer.twitter.com/) 申请一个开发者账户。  
+2. Create a project and generate your API keys and Bearer Token.  
+2. 创建一个项目并生成你的 API 密钥和 Bearer Token。  
+3. Insert your `Bearer Token` into the `bearer_token` variable in the code.  
+3. 将你的 `Bearer Token` 填入代码中的 `bearer_token` 变量。  
 
-   First, clone this repository to your local machine:
+### 4. Run the App  
+### 4. 运行应用  
 
-   ```bash
-   git clone https://github.com/Sam121-chang/HACKDKU--SSA-Financial-Race.git
-   ```
+Once you've installed the dependencies and set up the Twitter API, you can run the Streamlit app:  
+安装完依赖并配置好 Twitter API 后，你可以启动 Streamlit 应用：  
+```bash  
+streamlit run app.py  
+```  
 
-2. **Navigate to the project directory** / 进入项目目录
+Streamlit will automatically open the browser and display the app interface.  
+Streamlit 会自动打开浏览器，并展示应用界面。  
 
-   Change to the project directory:
+### 5. Use the App  
+### 5. 使用应用  
 
-   ```bash
-   cd HACKDKU--SSA-Financial-Race
-   ```
+- **Fetch Twitter Data**: Enter a keyword in the app interface to display the most recent tweets about that topic.  
+- **获取 Twitter 数据**：在应用界面输入关键词，展示关于该主题的最新推文。  
 
-3. **Install dependencies** / 安装依赖项
+- **View Stock Data**: Enter a stock ticker (e.g., AAPL) in the app interface to display the historical data and price trend of that stock.  
+- **查看股票数据**：在应用界面输入股票代码（例如 AAPL），展示该股票的历史数据和价格趋势。  
 
-   Ensure you have Python 3.8 or later installed, then run the following command to install the necessary Python packages:
+## Project Structure  
+## 项目结构  
 
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-   This will install the required libraries including Streamlit, Tweepy, YFinance, and Pandas.
-
-4. **Set up Twitter API credentials** / 配置Twitter API凭证
-
-   To access Twitter data, you need to set up your Twitter Developer API credentials. Follow these steps:
-   
-   - Go to the [Twitter Developer Portal](https://developer.twitter.com/) and create a new project.
-   - Get your **Bearer Token** and add it to the `bearer_token` variable in the `app.py` file.
-   
-   在访问Twitter数据之前，你需要设置Twitter开发者API凭证。按以下步骤操作：
-   
-   - 访问 [Twitter开发者门户](https://developer.twitter.com/)，并创建一个新的项目。
-   - 获取你的 **Bearer Token** 并将其添加到 `app.py` 文件中的 `bearer_token` 变量。
-
-5. **Run the Streamlit app** / 运行Streamlit应用
-
-   After installing the dependencies and configuring the API credentials, run the Streamlit app:
-
-   ```bash
-   streamlit run app.py
-   ```
-
-   This will start the Streamlit server, and you can view the app in your browser at `http://localhost:8501`.
-
----
-
-## Usage / 使用
-
-- **Twitter Data** / Twitter 数据
-    - Enter a keyword in the search box to fetch the latest tweets related to that keyword.
-    - 输入一个关键词来获取与该关键词相关的最新推文。
-
-- **Stock Data** / 股票数据
-    - Enter a stock ticker symbol (e.g., AAPL for Apple) to fetch the historical stock data.
-    - 输入股票代码（例如：AAPL表示苹果公司）来获取该股票的历史数据。
-
----
-
-## Deployment / 部署
-
-You can deploy this app on your own server or use a cloud service like AWS Elastic Beanstalk to host it. Here's how you can deploy it on **AWS Elastic Beanstalk**:
-
-1. **Install AWS CLI and EB CLI** / 安装 AWS CLI 和 EB CLI
-    - Follow the [AWS CLI Installation Guide](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) to install AWS CLI.
-    - Follow the [EB CLI Installation Guide](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html) to install EB CLI.
-
-2. **Create an Elastic Beanstalk application** / 创建Elastic Beanstalk应用
-    - Run the following command to initialize the application:
-    
-    ```bash
-    eb init -p python-3.8 my-financial-prediction-app
-    ```
-
-    - Then create a new environment:
-    
-    ```bash
-    eb create my-financial-prediction-env
-    ```
-
-3. **Deploy to Elastic Beanstalk** / 部署到Elastic Beanstalk
-
-    After configuring your AWS credentials, deploy the app:
-
-    ```bash
-    eb deploy
-    ```
-
-    You can then access your app via the Elastic Beanstalk URL.
-
----
-
-## License / 许可证
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-该项目使用MIT许可证 - 详情请参阅 [LICENSE](LICENSE) 文件。
-
----
-
-## Acknowledgements / 致谢
-
-- Thanks to AWS for sponsoring this project.
-- Thanks to [Tweepy](https://www.tweepy.org/) for providing an easy way to interact with the Twitter API.
-- Thanks to [YFinance](https://pypi.org/project/yfinance/) for providing stock data.
-
-
-感谢 [Tweepy](https://www.tweepy.org/) 提供了与Twitter API交互的便捷方法。
-感谢 [YFinance](https://pypi.org/project/yfinance/) 提供股票数据。
+```
+├── app.py            # Streamlit main application file  
+├── requirements.txt  # Project dependencies file  
+└── README.md         # Project description file  
 ```
 
-### 关键内容解释：
-- **如何克隆代码**：提供了克隆仓库的命令。
-- **安装依赖项**：通过 `pip install -r requirements.txt` 安装所有必要的库。
-- **Twitter API 配置**：解释了如何获取 Twitter API 凭证并将其配置到代码中。
-- **运行应用**：展示了如何启动 Streamlit 应用。
-- **AWS 部署**：提供了如何将应用部署到 AWS Elastic Beanstalk 的简要说明。
+## Tech Stack  
+## 技术栈  
+
+- **Python**: The primary programming language  
+- **Streamlit**: Used to build the web app  
+- **Tweepy**: Used to interact with the Twitter API  
+- **yfinance**: Used to fetch stock data  
+
+- **Python**: 主要编程语言  
+- **Streamlit**: 用于构建 Web 应用  
+- **Tweepy**: 用于访问 Twitter API  
+- **yfinance**: 用于获取股市数据  
+
+## Contributing  
+## 贡献  
+
+Feel free to contribute! If you have any ideas or find a bug, feel free to open an Issue or create a Pull Request.  
+欢迎贡献！如果你有任何想法或发现了 bug，欢迎提出 Issue 或 Pull Request。  
+
+## License  
+## 许可证  
+
+This project is licensed under the [MIT License](LICENSE).  
+此项目采用 [MIT License](LICENSE) 开源协议。
+```
+
+这个版本的 `README.md` 包含了中英文的说明，帮助用户理解如何使用和运行这个项目。你可以将这个内容复制并粘贴到你的 GitHub 仓库的 `README.md` 文件中。
