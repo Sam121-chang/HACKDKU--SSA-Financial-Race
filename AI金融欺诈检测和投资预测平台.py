@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#解决Python 3.12兼容性问题
+#解决Python 3.12兼容性问题（Solve Python 3.12 compatibility issues）
 import sys
 if sys.version_info >= (3, 12):
     import setuptools  
