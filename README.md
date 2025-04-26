@@ -1,134 +1,147 @@
 ```markdown
-# HACKDKU--SSA-Financial-Race
+# AI Financial Fraud Detection & Investment Prediction Platform
 
-## 项目概述
+This is a Streamlit-based platform for financial fraud detection and investment prediction. The application uses real-time Twitter data and historical stock data to provide insights into financial markets. The goal of this project is to predict potential market trends and provide a simple interface to monitor financial data.
 
-这是我参加 **2025昆山杜克大学黑客松比赛（HACKDKU）** 金融赛道的项目。本项目使用 AI 技术构建了一个投资预测平台，旨在帮助投资者做出更精确的决策。通过分析股票数据，预测未来的股票价格走势，提供可靠的投资建议。
-
-## 项目功能
-
-- **股票数据获取**：自动从公开的数据源获取最新的股票市场数据。
-- **数据分析**：使用机器学习算法对股票价格进行分析，预测未来的涨跌趋势。
-- **可视化展示**：图表展示历史价格与预测结果，帮助用户更直观地理解数据。
-- **投资预测**：基于历史数据，使用AI模型预测股票的未来价格。
-
-## 技术栈
-
-- Python
-- Pandas
-- NumPy
-- Matplotlib
-- Scikit-Learn
-- yFinance API (用于获取股票数据)
-
-## 安装与运行
-
-### 环境要求
-
-- Python 3.7 及以上版本
-- 相关依赖库：Pandas, NumPy, Matplotlib, Scikit-learn, yFinance
-
-### 安装步骤
-
-1. 克隆此仓库到本地：
-   ```bash
-   git clone https://github.com/Sam121-chang/HACKDKU--SSA-Financial-Race.git
-   ```
-   
-2. 进入项目目录：
-   ```bash
-   cd HACKDKU--SSA-Financial-Race
-   ```
-
-3. 安装依赖：
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. 运行主程序：
-   ```bash
-   python main.py
-   ```
-
-### 使用说明
-
-1. 在 `main.py` 文件中，修改要预测的股票符号（例如：`AAPL` 为苹果公司股票）。
-2. 运行程序后，系统将从 yFinance 获取该股票的历史数据，并使用训练好的模型进行未来价格的预测。
-3. 结果将以图表的形式展示，便于用户查看。
-
-## 贡献
-
-欢迎任何形式的贡献！如果您有任何建议或发现 bug，欢迎提交 Issue 或 Pull Request。
-
-## License
-
-本项目采用 MIT 许可证，详情请查看 [LICENSE](LICENSE) 文件。
+这是一个基于Streamlit的金融欺诈检测与投资预测平台。该应用程序使用实时Twitter数据和历史股票数据，提供关于金融市场的洞察。该项目的目标是预测潜在的市场趋势，并提供一个简单的界面来监控金融数据。
 
 ---
 
-# HACKDKU--SSA-Financial-Race
+## Features / 功能
 
-## Project Overview
+- **Twitter Data Integration**: Fetch recent tweets based on keywords.
+- **股票数据集成**：获取基于股票代码的历史数据。
+- **Real-time Financial Insights**: Display Twitter data and stock prices.
+- **实时金融数据展示**：展示Twitter数据和股票价格。
 
-This is my project for the **2025 Hackathon of Duke Kunshan University (HACKDKU)** in the financial track. The project uses AI technology to build an investment prediction platform aimed at helping investors make more accurate decisions. By analyzing stock data, it predicts future stock price trends and provides reliable investment advice.
+---
 
-## Features
+## Prerequisites / 环境要求
 
-- **Stock Data Retrieval**: Automatically fetch the latest stock market data from public data sources.
-- **Data Analysis**: Use machine learning algorithms to analyze stock prices and predict future trends.
-- **Visualization**: Display historical prices and prediction results in charts for better data understanding.
-- **Investment Prediction**: Predict future stock prices based on historical data using AI models.
+- Python 3.8 or later / Python 3.8 或更高版本
+- pip (Python package manager) / pip（Python包管理器）
 
-## Tech Stack
+---
 
-- Python
-- Pandas
-- NumPy
-- Matplotlib
-- Scikit-Learn
-- yFinance API (for fetching stock data)
+## Installation / 安装
 
-## Installation and Running
+1. **Clone the repository** / 克隆仓库
 
-### Requirements
+   First, clone this repository to your local machine:
 
-- Python 3.7 or higher
-- Dependencies: Pandas, NumPy, Matplotlib, Scikit-learn, yFinance
-
-### Installation Steps
-
-1. Clone the repository to your local machine:
    ```bash
    git clone https://github.com/Sam121-chang/HACKDKU--SSA-Financial-Race.git
    ```
 
-2. Navigate to the project directory:
+2. **Navigate to the project directory** / 进入项目目录
+
+   Change to the project directory:
+
    ```bash
    cd HACKDKU--SSA-Financial-Race
    ```
 
-3. Install dependencies:
+3. **Install dependencies** / 安装依赖项
+
+   Ensure you have Python 3.8 or later installed, then run the following command to install the necessary Python packages:
+
    ```bash
    pip install -r requirements.txt
    ```
 
-4. Run the main program:
+   This will install the required libraries including Streamlit, Tweepy, YFinance, and Pandas.
+
+4. **Set up Twitter API credentials** / 配置Twitter API凭证
+
+   To access Twitter data, you need to set up your Twitter Developer API credentials. Follow these steps:
+   
+   - Go to the [Twitter Developer Portal](https://developer.twitter.com/) and create a new project.
+   - Get your **Bearer Token** and add it to the `bearer_token` variable in the `app.py` file.
+   
+   在访问Twitter数据之前，你需要设置Twitter开发者API凭证。按以下步骤操作：
+   
+   - 访问 [Twitter开发者门户](https://developer.twitter.com/)，并创建一个新的项目。
+   - 获取你的 **Bearer Token** 并将其添加到 `app.py` 文件中的 `bearer_token` 变量。
+
+5. **Run the Streamlit app** / 运行Streamlit应用
+
+   After installing the dependencies and configuring the API credentials, run the Streamlit app:
+
    ```bash
-   python main.py
+   streamlit run app.py
    ```
 
-### Usage Instructions
+   This will start the Streamlit server, and you can view the app in your browser at `http://localhost:8501`.
 
-1. In the `main.py` file, modify the stock symbol you want to predict (e.g., `AAPL` for Apple Inc.).
-2. After running the program, it will fetch historical data for that stock from yFinance and predict future prices using the trained model.
-3. The results will be displayed in a chart for better visualization.
+---
 
-## Contributing
+## Usage / 使用
 
-Contributions are welcome! If you have any suggestions or find any bugs, feel free to submit an Issue or a Pull Request.
+- **Twitter Data** / Twitter 数据
+    - Enter a keyword in the search box to fetch the latest tweets related to that keyword.
+    - 输入一个关键词来获取与该关键词相关的最新推文。
 
-## License
+- **Stock Data** / 股票数据
+    - Enter a stock ticker symbol (e.g., AAPL for Apple) to fetch the historical stock data.
+    - 输入股票代码（例如：AAPL表示苹果公司）来获取该股票的历史数据。
+
+---
+
+## Deployment / 部署
+
+You can deploy this app on your own server or use a cloud service like AWS Elastic Beanstalk to host it. Here's how you can deploy it on **AWS Elastic Beanstalk**:
+
+1. **Install AWS CLI and EB CLI** / 安装 AWS CLI 和 EB CLI
+    - Follow the [AWS CLI Installation Guide](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) to install AWS CLI.
+    - Follow the [EB CLI Installation Guide](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/eb-cli3-install.html) to install EB CLI.
+
+2. **Create an Elastic Beanstalk application** / 创建Elastic Beanstalk应用
+    - Run the following command to initialize the application:
+    
+    ```bash
+    eb init -p python-3.8 my-financial-prediction-app
+    ```
+
+    - Then create a new environment:
+    
+    ```bash
+    eb create my-financial-prediction-env
+    ```
+
+3. **Deploy to Elastic Beanstalk** / 部署到Elastic Beanstalk
+
+    After configuring your AWS credentials, deploy the app:
+
+    ```bash
+    eb deploy
+    ```
+
+    You can then access your app via the Elastic Beanstalk URL.
+
+---
+
+## License / 许可证
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+该项目使用MIT许可证 - 详情请参阅 [LICENSE](LICENSE) 文件。
+
+---
+
+## Acknowledgements / 致谢
+
+- Thanks to AWS for sponsoring this project.
+- Thanks to [Tweepy](https://www.tweepy.org/) for providing an easy way to interact with the Twitter API.
+- Thanks to [YFinance](https://pypi.org/project/yfinance/) for providing stock data.
+
+
+感谢 [Tweepy](https://www.tweepy.org/) 提供了与Twitter API交互的便捷方法。
+感谢 [YFinance](https://pypi.org/project/yfinance/) 提供股票数据。
 ```
 
+### 关键内容解释：
+- **如何克隆代码**：提供了克隆仓库的命令。
+- **安装依赖项**：通过 `pip install -r requirements.txt` 安装所有必要的库。
+- **Twitter API 配置**：解释了如何获取 Twitter API 凭证并将其配置到代码中。
+- **运行应用**：展示了如何启动 Streamlit 应用。
+- **AWS 部署**：提供了如何将应用部署到 AWS Elastic Beanstalk 的简要说明。
