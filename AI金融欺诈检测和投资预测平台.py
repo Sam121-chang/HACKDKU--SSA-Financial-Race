@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+解决Python 3.12兼容性问题
+import sys
+if sys.version_info >= (3, 12):
+    import setuptools  
 # 导入必要的库 (Import required libraries)
 import streamlit as st
 import yfinance as yf
