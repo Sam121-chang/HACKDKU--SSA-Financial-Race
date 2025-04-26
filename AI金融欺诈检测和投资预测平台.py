@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-#解决Python 3.12兼容性问题（Solve Python 3.12 compatibility issues）
+# 在文件最开头添加（解决Python 3.12兼容性问题）
 import sys
-# 必须在其他导入之前执行
-try:
-    import setuptools  # 显式声明依赖
-except ImportError:
-    pass  # 在部署环境自动安装
-    # 导入必要的库 (Import required libraries)
+if sys.version_info >= (3, 12):
+    import setuptools   # 替代被移除的distutils模块
+
+# 导入必要的库 (Import required libraries)
 import streamlit as st
 import yfinance as yf
 import pandas as pd
@@ -16,44 +14,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder
-
-# 上传CSV文件 (Upload CSV file)
-uploaded_file = st.file_uploader("上传包含交易记录的CSV文件 (Upload CSV file with transactions)", type=["csv"])
-
-if uploaded_file is not None:
-    # 读取数据 (Read data)
-    data = pd.read_csv(uploaded_file)
-    st.write("数据预览 (Data Preview):")
-    st.dataframe(data.head())
-
-    if 'fraud' not in data.columns:
-        st.error('CSV文件必须包含“fraud”列 (CSV must include "fraud" column).')
-    else:
-        X = data.drop('fraud', axis=1)  # 特征 (Features)
-        y = data['fraud']  # 标签 (Labels)
-
-        # 拆分训练集和测试集 (Split into train and test sets)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-        # 训练随机森林模型 (Train Random Forest model)
-        model = RandomForestClassifier()
-        model.fit(X_train, y_train)
-
-        # 预测与评估 (Prediction and evaluation)
-        y_pred = model.predict(X_test)
-        accuracy = accuracy_score(y_test, y_pred)
-
-        st.success(f"欺诈检测模型训练完成！准确率：{accuracy:.2%} (Fraud detection model trained! Accuracy: {accuracy:.2%})")
-
-        # 创建结果表格 (Create result dataframe)
-        prediction_df = X_test.copy()  # 确保这里的 X_test 是有效的
-        prediction_df['真实是否欺诈 (Actual Fraud)'] = y_test.values
-        prediction_df['预测是否欺诈 (Predicted Fraud)'] = y_pred
-        prediction_df['预测结果 (Prediction Result)'] = np.where(
-            prediction_df['预测是否欺诈 (Predicted Fraud)'] == 1, '欺诈 (Fraud)', '非欺诈 (Non-Fraud)')
-
-        # 显示预测结果 (Display prediction results)
-        st.write(prediction_df)
 
 # 定义Q-Learning智能体 (Define the Q-Learning agent)
 class PortfolioOptimizationAgent:
@@ -147,14 +107,9 @@ if mode == "📈 投资组合优化 (Portfolio Optimization)":
         for stock in optimized_portfolio:
             optimized_portfolio[stock] /= total
 
-        # 将投资比例限制在小数点后四位
-        for stock in optimized_portfolio:
-            optimized_portfolio[stock] = round(optimized_portfolio[stock], 4)
-
         # 显示优化结果 (Display optimized investment portfolio)
         st.subheader('投资优化组合结果 (Optimized Investment Portfolio)')
-        result_df = pd.DataFrame(list(optimized_portfolio.items()), columns=["股票代码 (Stock)", "投资比例 (Investment Ratio)"])
-        st.table(result_df.style.format({'投资比例 (Investment Ratio)': '{:.4f}'}))  # 保留4位小数
+        st.table(pd.DataFrame(list(optimized_portfolio.items()), columns=["股票代码 (Stock)", "投资比例 (Investment Ratio)"]))
 
         # 绘制投资分布饼图 (Plot investment distribution pie chart)
         fig, ax = plt.subplots()
@@ -198,14 +153,18 @@ elif mode == "🛡️ 欺诈检测 (Fraud Detection)":
             st.success(f"欺诈检测模型训练完成！准确率：{accuracy:.2%} (Fraud detection model trained! Accuracy: {accuracy:.2%})")
 
             # 显示欺诈检测预测结果 (Display fraud detection results)
-st.subheader("欺诈检测预测结果 (Fraud Detection Predictions)")
+            st.subheader("欺诈检测预测结果 (Fraud Detection Predictions)")
 
-# 创建结果表格 (Create result dataframe)
-prediction_df = X_test.copy()
-prediction_df['真实是否欺诈 (Actual Fraud)'] = y_test.values
-prediction_df['预测是否欺诈 (Predicted Fraud)'] = y_pred
-prediction_df['预测结果 (Prediction Result)'] = np.where(
-    prediction_df['预测是否欺诈 (Predicted Fraud)'] == 1, '欺诈 (Fraud)', '非欺诈 (Non-Fraud)')
+            # 创建结果表格 (Create result dataframe)
+            prediction_df = X_test.copy()
+            prediction_df['真实是否欺诈 (Actual Fraud)'] = y_test.values
+            prediction_df['预测是否欺诈 (Predicted Fraud)'] = y_pred
+            prediction_df['预测结果 (Prediction Result)'] = np.where(
+                prediction_df['预测是否欺诈 (Predicted Fraud)'] == 1, '欺诈', '正常')
 
-# 显示预测结果 (Display prediction results)
-st.write(prediction_df)
+            # 只显示重要字段 (Only show key columns)
+            display_df = prediction_df[['amount', '真实是否欺诈 (Actual Fraud)', '预测是否欺诈 (Predicted Fraud)',
+                                        '预测结果 (Prediction Result)']]
+
+
+           
