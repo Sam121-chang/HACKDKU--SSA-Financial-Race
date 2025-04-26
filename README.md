@@ -1,5 +1,3 @@
-以下是中英双语版本的 `README.md`，包括项目的功能、安装与运行步骤、技术栈等内容，适合直接复制到你的 GitHub 仓库中：
-
 ```markdown
 # AI Financial Fraud Detection and Investment Prediction Platform  
 AI金融欺诈检测和投资预测平台  
@@ -108,4 +106,3 @@ This project is licensed under the [MIT License](LICENSE).
 此项目采用 [MIT License](LICENSE) 开源协议。
 ```
 
-这个版本的 `README.md` 包含了中英文的说明，帮助用户理解如何使用和运行这个项目。你可以将这个内容复制并粘贴到你的 GitHub 仓库的 `README.md` 文件中。
