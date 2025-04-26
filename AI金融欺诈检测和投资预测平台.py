@@ -96,3 +96,42 @@ if st.button('开始优化'):
         # 补充：下载按钮
         csv_download = pd.DataFrame({'股票': tickers, '投资比例': best_weights})
         st.download_button(label="下载投资方案CSV", data=csv_download.to_csv(index=False).encode('utf-8'), file_name='portfolio_recommendation.csv', mime='text/csv')
+
+# 欺诈检测模块
+elif mode == "🛡️ 欺诈检测":
+    st.header('🛡️ 欺诈检测')
+
+    # 上传CSV文件
+    uploaded_file = st.file_uploader("上传包含交易记录的CSV文件", type=["csv"])
+
+    if uploaded_file is not None:
+        data = pd.read_csv(uploaded_file)
+        st.write("数据预览:")
+        st.dataframe(data.head())
+
+        if 'fraud' not in data.columns:
+            st.error('CSV文件必须包含“fraud”列')
+        else:
+            X = data.drop('fraud', axis=1)
+            y = data['fraud']
+
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+            model = RandomForestClassifier()
+            model.fit(X_train, y_train)
+
+            y_pred = model.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+
+            st.success(f"欺诈检测模型训练完成！准确率：{accuracy:.2%}")
+
+            # 显示欺诈检测预测结果
+            st.subheader("欺诈检测预测结果")
+
+            prediction_df = X_test.copy()
+            prediction_df['真实是否欺诈'] = y_test.values
+            prediction_df['预测是否欺诈'] = y_pred
+            prediction_df['预测结果'] = np.where(prediction_df['预测是否欺诈'] == 1, '欺诈', '正常')
+
+            display_df = prediction_df[['amount', '真实是否欺诈', '预测是否欺诈', '预测结果']]
+            st.write(display_df)
