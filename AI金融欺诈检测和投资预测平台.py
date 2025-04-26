@@ -64,14 +64,21 @@ if mode == "📈 投资组合优化 (Portfolio Optimization)":
     selected_stocks = [symbol.strip() for symbol in stock_symbols.split(',')]
 
     if selected_stocks:
-        # 下载股票数据 (Download stock data)
+       # 下载股票数据 (Download stock data)
         data = yf.download(selected_stocks, start='2022-01-01', end='2024-01-01')
-        closing_prices = data['Close']  # 收盘价数据 (Closing prices)
 
-        # 显示股票价格走势图 (Show stock price chart)
+        # 输出检查下载的数据 (Output to check the downloaded data)
+        st.write(data.head())  # 检查数据是否正确
+
+        # 收盘价数据 (Closing prices)
+        closing_prices = data['Close']
+
+        # 再次检查数据 (Check closing_prices)
+        st.write(closing_prices.head())  # 检查是否提取了收盘价数据
+
+        # 绘制股票价格走势图 (Show stock price chart)
         st.subheader('股票价格走势 (Stock Price Trend)')
-        st.line_chart(closing_prices)
-
+        st.line_chart(closing_prices)        
         # 计算每日收益率 (Calculate daily returns)
         returns = closing_prices.pct_change().dropna()
 
