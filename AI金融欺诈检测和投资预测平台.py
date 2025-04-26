@@ -78,12 +78,24 @@ if mode == "📈 投资组合优化 (Portfolio Optimization)":
 
         # 确保数据格式正确 (Ensure data format)
         if not closing_prices.empty:
-            # 绘制股票价格走势图 (Show stock price chart)
+            # 使用Matplotlib绘制图表 (Use Matplotlib to plot the chart)
             st.subheader('股票价格走势 (Stock Price Trend)')
-            st.line_chart(closing_prices.set_index('Date'))  # 使用日期作为x轴，确保使用正确的时间索引
+
+            # 绘制股市走势图 (Plot the stock price trend)
+            plt.figure(figsize=(10, 6))
+            for stock in selected_stocks:
+                plt.plot(closing_prices['Date'], closing_prices[stock], label=stock)  # 绘制每只股票的收盘价
+
+            plt.title('股票价格走势图 (Stock Price Trend)')
+            plt.xlabel('日期 (Date)')
+            plt.ylabel('收盘价 (Closing Price)')
+            plt.legend()
+            plt.grid(True)
+
+            # 显示图表 (Show the chart)
+            st.pyplot(plt)
         else:
-            st.error('无法加载股市数据，请检查股票代码或网络连接。')
-        # 计算每日收益率 (Calculate daily returns)
+            st.error('无法加载股市数据，请检查股票代码或网络连接。')        # 计算每日收益率 (Calculate daily returns)
         returns = closing_prices.pct_change().dropna()
 
         # 初始化Q-Learning智能体 (Initialize Q-Learning agent)
