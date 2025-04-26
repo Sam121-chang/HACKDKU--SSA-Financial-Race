@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 #解决Python 3.12兼容性问题（Solve Python 3.12 compatibility issues）
-
 import sys
-if sys.version_info >= (3, 12):
-    import setuptools  
+# 必须在其他导入之前执行
+try:
+    import setuptools  # 显式声明依赖
+except ImportError:
+    pass  # 在部署环境自动安装
     
 # 导入必要的库 (Import required libraries)
 import streamlit as st
