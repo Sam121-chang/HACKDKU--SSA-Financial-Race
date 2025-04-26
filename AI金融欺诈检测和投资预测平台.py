@@ -13,6 +13,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder
+import matplotlib.pyplot as plt
 
 # 定义Q-Learning智能体 (Define the Q-Learning agent)
 class PortfolioOptimizationAgent:
@@ -106,20 +107,45 @@ if mode == "📈 投资组合优化 (Portfolio Optimization)":
         st.subheader('投资优化组合结果 (Optimized Investment Portfolio)')
         st.table(pd.DataFrame(list(optimized_portfolio.items()), columns=["股票代码 (Stock)", "投资比例 (Investment Ratio)"]))
 
-        # 计算并显示投资组合的期望收益率和风险 (Calculate and display portfolio expected return and risk)
-        expected_return = calculate_portfolio_return(list(optimized_portfolio.values()), returns.mean())
-        portfolio_risk = np.sqrt(np.dot(list(optimized_portfolio.values()), np.dot(returns.cov(), list(optimized_portfolio.values()))))
-
-        st.subheader('投资组合统计分析 (Portfolio Statistics)')
-        st.write(f'期望年收益率: {expected_return:.2%}')  # Expected annual return
-        st.write(f'年化波动率 (风险): {portfolio_risk:.2%}')  # Annualized volatility (Risk)
+        # 绘制投资分布饼图 (Plot investment distribution pie chart)
+        fig, ax = plt.subplots()
+        ax.pie(optimized_portfolio.values(), labels=optimized_portfolio.keys(), autopct='%1.1f%%', startangle=90)
+        ax.axis('equal')  # 保持饼图为正圆形 (Ensure pie is a circle)
+        st.pyplot(fig)
 
         # 显示彩带 (Show balloons)
         st.balloons()
 
+        # 绘制历史表现图表 (Plot historical performance)
+        st.subheader('投资组合的历史表现 (Historical Performance of the Portfolio)')
+
+        # 模拟投资组合的回报 (Simulate portfolio returns)
+        portfolio_weights = np.array(list(optimized_portfolio.values()))
+        portfolio_returns = returns.dot(portfolio_weights)  # 投资组合回报 (Portfolio return)
+        cumulative_returns = (1 + portfolio_returns).cumprod()  # 累计回报 (Cumulative returns)
+
+        fig, ax = plt.subplots()
+        ax.plot(cumulative_returns, label='投资组合累计回报 (Cumulative Portfolio Return)')
+        ax.set_xlabel('日期 (Date)')
+        ax.set_ylabel('累计回报 (Cumulative Return)')
+        ax.set_title('投资组合的历史表现 (Historical Performance of the Portfolio)')
+        st.pyplot(fig)
+
+        # 计算并显示风险评估指标 (Calculate and display risk metrics)
+        st.subheader('投资组合的风险评估 (Risk Metrics of the Portfolio)')
+
+        # 波动率 (Volatility)
+        volatility = portfolio_returns.std() * np.sqrt(252)  # 年化波动率 (Annualized volatility)
+        st.write(f"年化波动率 (Annualized Volatility): {volatility:.2%}")
+
+        # 夏普比率 (Sharpe Ratio)
+        risk_free_rate = 0.03  # 假设无风险利率 (Assume risk-free rate is 3%)
+        sharpe_ratio = (portfolio_returns.mean() * 252 - risk_free_rate) / volatility
+        st.write(f"夏普比率 (Sharpe Ratio): {sharpe_ratio:.2f}")
+
 # 欺诈检测模块 (Fraud Detection Module)
 elif mode == "🛡️ 欺诈检测 (Fraud Detection)":
-    st.header('🛡️ 欺诈检测 (Fra Fraud Detection)')
+    st.header('🛡️ 欺诈检测 (Fraud Detection)')
 
     # 上传CSV文件 (Upload CSV file)
     uploaded_file = st.file_uploader("上传包含交易记录的CSV文件 (Upload CSV file with transactions)", type=["csv"])
@@ -162,5 +188,4 @@ elif mode == "🛡️ 欺诈检测 (Fraud Detection)":
             # 只显示重要字段 (Only show key columns)
             display_df = prediction_df[['amount', '真实是否欺诈 (Actual Fraud)', '预测是否欺诈 (Predicted Fraud)',
                                         '预测结果 (Prediction Result)']]
-
-            st.dataframe(display_df)  # 显示欺诈检测预测表格
+            st.write(display_df)
