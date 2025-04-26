@@ -17,6 +17,44 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelEncoder
 
+# 上传CSV文件 (Upload CSV file)
+uploaded_file = st.file_uploader("上传包含交易记录的CSV文件 (Upload CSV file with transactions)", type=["csv"])
+
+if uploaded_file is not None:
+    # 读取数据 (Read data)
+    data = pd.read_csv(uploaded_file)
+    st.write("数据预览 (Data Preview):")
+    st.dataframe(data.head())
+
+    if 'fraud' not in data.columns:
+        st.error('CSV文件必须包含“fraud”列 (CSV must include "fraud" column).')
+    else:
+        X = data.drop('fraud', axis=1)  # 特征 (Features)
+        y = data['fraud']  # 标签 (Labels)
+
+        # 拆分训练集和测试集 (Split into train and test sets)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+        # 训练随机森林模型 (Train Random Forest model)
+        model = RandomForestClassifier()
+        model.fit(X_train, y_train)
+
+        # 预测与评估 (Prediction and evaluation)
+        y_pred = model.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+
+        st.success(f"欺诈检测模型训练完成！准确率：{accuracy:.2%} (Fraud detection model trained! Accuracy: {accuracy:.2%})")
+
+        # 创建结果表格 (Create result dataframe)
+        prediction_df = X_test.copy()  # 确保这里的 X_test 是有效的
+        prediction_df['真实是否欺诈 (Actual Fraud)'] = y_test.values
+        prediction_df['预测是否欺诈 (Predicted Fraud)'] = y_pred
+        prediction_df['预测结果 (Prediction Result)'] = np.where(
+            prediction_df['预测是否欺诈 (Predicted Fraud)'] == 1, '欺诈 (Fraud)', '非欺诈 (Non-Fraud)')
+
+        # 显示预测结果 (Display prediction results)
+        st.write(prediction_df)
+
 # 定义Q-Learning智能体 (Define the Q-Learning agent)
 class PortfolioOptimizationAgent:
     def __init__(self, n_stocks, n_actions, learning_rate=0.1, discount_factor=0.95, exploration_rate=1.0, exploration_decay=0.995):
