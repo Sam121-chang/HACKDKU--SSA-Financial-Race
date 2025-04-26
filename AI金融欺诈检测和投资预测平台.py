@@ -5,186 +5,94 @@ if sys.version_info >= (3, 12):
 
 import streamlit as st
 import yfinance as yf
-import pandas as pd
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-from sklearn.preprocessing import LabelEncoder
+import pandas as pd
 import matplotlib.pyplot as plt
+import random
 
-# 定义Q-Learning智能体
-class PortfolioOptimizationAgent:
-    def __init__(self, n_stocks, n_actions, learning_rate=0.1, discount_factor=0.95, exploration_rate=1.0, exploration_decay=0.995):
-        self.n_stocks = n_stocks
-        self.n_actions = n_actions
-        self.q_table = np.random.rand(500, n_actions)
-        self.learning_rate = learning_rate
-        self.discount_factor = discount_factor
-        self.exploration_rate = exploration_rate
-        self.exploration_decay = exploration_decay
+# Streamlit 页面基本设置
+st.set_page_config(page_title="智能投资组合优化器", layout="wide")
 
-    def select_action(self, state):
-        if np.random.rand() < self.exploration_rate:
-            return np.random.randint(self.n_actions)
-        else:
-            return np.argmax(self.q_table[int(state)])
+st.title('智能投资组合优化器')
+st.markdown('使用强化学习（Q-learning）自动优化你的投资组合。')
 
-    def update_q_value(self, state, action, reward, next_state):
-        if int(next_state) >= self.q_table.shape[0]:
-            next_state = self.q_table.shape[0] - 1
-        max_future_q = np.max(self.q_table[int(next_state)])
-        current_q = self.q_table[int(state)][action]
-        new_q = (1 - self.learning_rate) * current_q + self.learning_rate * (reward + self.discount_factor * max_future_q)
-        self.q_table[int(state)][action] = new_q
-        self.exploration_rate *= self.exploration_decay
+# 用户输入股票代码
+tickers_input = st.text_input('输入股票代码（用逗号分隔，如 AAPL,MSFT,GOOG）', 'AAPL,MSFT,GOOG')
+tickers = [ticker.strip().upper() for ticker in tickers_input.split(',') if ticker.strip()]
 
-# 计算投资组合收益
-def calculate_portfolio_return(weights, returns):
-    return np.sum(weights * returns)
+# 选择训练轮数
+episodes = st.slider('训练轮数（越多越精确，但耗时更长）', 100, 5000, 1000, step=100)
 
-# 页面标题
-st.title('AI金融欺诈检测与投资预测平台')
+# 确认按钮
+if st.button('开始优化'):
 
-# 侧边栏选择功能
-st.sidebar.title("功能选择")
-mode = st.sidebar.radio("请选择功能", ("📈 投资组合优化", "🛡️ 欺诈检测"))
+    if len(tickers) < 2:
+        st.warning('请至少输入两个有效的股票代码。')
+    else:
+        st.success('正在下载数据并进行训练，请稍候...')
 
-# 投资组合优化模块
-if mode == "📈 投资组合优化":
-    st.header('📈 投资组合优化')
-
-    # 股票代码输入
-    stock_symbols = st.text_input('输入股票代码（用逗号分隔，如AAPL,MSFT,TSLA）', 'AAPL,MSFT,TSLA')
-    selected_stocks = [symbol.strip() for symbol in stock_symbols.split(',')]
-
-    if selected_stocks:
         # 下载股票数据
-        data = yf.download(selected_stocks, start='2022-01-01', end='2024-01-01')
-        closing_prices = data['Close']
+        data = yf.download(tickers, start="2020-01-01", end="2024-12-31")['Adj Close']
+        returns = data.pct_change().dropna()
 
-        # 计算每日收益率
-        returns = closing_prices.pct_change().dropna()
+        # 初始化Q-learning元素
+        n_assets = len(tickers)
+        n_actions = 100  # 离散动作数量
+        q_table = np.zeros((n_actions,) * n_assets)
+        learning_rate = 0.1
+        discount_factor = 0.95
+        epsilon = 0.1  # 探索率
 
-        # 初始化Q-Learning智能体
-        st.subheader('初始化投资组合优化环境...')
-        agent = PortfolioOptimizationAgent(n_stocks=len(selected_stocks), n_actions=len(selected_stocks))
+        actions = np.linspace(0, 1, n_actions)
 
-        # 开始训练Q-Learning智能体
-        st.subheader('训练中...')
-        num_episodes = 500
-        initial_state = 0
+        # 简单随机环境模拟
+        def get_reward(weights, returns):
+            weights = np.array(weights)
+            if not np.isclose(np.sum(weights), 1):
+                return -100  # 惩罚，不合法
+            port_return = np.dot(returns.mean(), weights)
+            port_volatility = np.sqrt(np.dot(weights.T, np.dot(returns.cov(), weights)))
+            if port_volatility == 0:
+                return -100
+            sharpe_ratio = port_return / port_volatility
+            return sharpe_ratio
 
-        for episode in range(num_episodes):
-            state = initial_state
-            for i in range(len(returns) - 1):
-                action = agent.select_action(state)
-                reward = returns.iloc[i, action]
-                next_state = state + 1
-                agent.update_q_value(state, action, reward, next_state)
-                state = next_state
-            if (episode + 1) % 100 == 0:
-                st.text(f'训练中...第 {episode+1}/{num_episodes} 次训练')
+        # Q-learning训练
+        for episode in range(episodes):
+            state = tuple([random.randint(0, n_actions - 1) for _ in range(n_assets)])
+            weights = [actions[i] for i in state]
+            weights = np.array(weights) / np.sum(weights)
 
-        st.success('投资组合优化完成！')
+            reward = get_reward(weights, returns)
 
-        # 生成优化后的投资组合
-        optimized_portfolio = {}
-        for i, stock in enumerate(selected_stocks):
-            optimized_portfolio[stock] = agent.q_table[-1][i]
+            next_state = tuple([random.randint(0, n_actions - 1) for _ in range(n_assets)])
+            q_table[state] = q_table[state] + learning_rate * (reward + discount_factor * np.max(q_table[next_state]) - q_table[state])
 
-        # 归一化投资比例
-        total = sum(optimized_portfolio.values())
-        for stock in optimized_portfolio:
-            optimized_portfolio[stock] /= total
+        # 找到最优权重
+        best_state = np.unravel_index(np.argmax(q_table), q_table.shape)
+        best_weights = [actions[i] for i in best_state]
+        best_weights = np.array(best_weights) / np.sum(best_weights)
 
         # 显示优化结果
-        st.subheader('投资优化组合结果')
-        st.table(pd.DataFrame(list(optimized_portfolio.items()), columns=["股票代码", "投资比例"]))
-
-        # 绘制柱状图
-        fig, ax = plt.subplots()
-        ax.bar(optimized_portfolio.keys(), optimized_portfolio.values())
-        ax.set_xlabel('股票代码')
-        ax.set_ylabel('投资比例')
-        ax.set_title('投资优化组合 (Optimized Investment Portfolio)')
-        st.pyplot(fig)
-
-        # 绘制历史表现图表
-        st.subheader('投资组合的历史表现')
-
-        # 直接简单平均持有所有股票
-        equal_weights = np.array([1 / len(selected_stocks)] * len(selected_stocks))
-        portfolio_returns_equal = returns.dot(equal_weights)
-        cumulative_returns_equal = (1 + portfolio_returns_equal).cumprod()
-    
-        fig, ax = plt.subplots()
-        ax.plot(cumulative_returns_equal, label='等权投资组合累计回报', color='blue')
-        ax.set_xlabel('日期')
-        ax.set_ylabel('累计回报')
-        ax.set_title('投资组合的历史表现（等权重）')
-        ax.legend()
-        st.pyplot(fig)
-
-        # 模拟投资组合的回报
-        portfolio_weights = np.array(list(optimized_portfolio.values()))
-        portfolio_returns = returns.dot(portfolio_weights)
-        cumulative_returns = (1 + portfolio_returns).cumprod()
+        st.subheader('投资组合推荐')
 
         fig, ax = plt.subplots()
-        ax.plot(cumulative_returns, label='投资组合累计回报')
-        ax.set_xlabel('日期')
-        ax.set_ylabel('累计回报')
-        ax.set_title('投资组合的历史表现')
+        ax.pie(best_weights, labels=tickers, autopct='%1.1f%%', startangle=90, counterclock=False)
+        ax.axis('equal')
         st.pyplot(fig)
 
-        # 计算并显示风险评估指标
-        st.subheader('投资组合的风险评估')
+        # 生成投资建议报告
+        st.subheader('📄 投资建议报告')
 
-        # 波动率
-        volatility = portfolio_returns.std() * np.sqrt(252)
-        st.write(f"年化波动率: {volatility:.2%}")
+        report_md = "### 🏦 投资建议\n\n"
+        report_md += "**推荐股票及对应投资比例：**\n\n"
+        for ticker, weight in zip(tickers, best_weights):
+            report_md += f"- **{ticker}**：{weight*100:.2f}%\n"
+        report_md += "\n"
+        report_md += "> **总结：** 本投资组合基于强化学习优化，旨在在风险控制下追求稳健收益，适合中长期投资者参考。\n"
 
-        # 夏普比率
-        risk_free_rate = 0.03
-        sharpe_ratio = (portfolio_returns.mean() * 252 - risk_free_rate) / volatility
-        st.write(f"夏普比率: {sharpe_ratio:.2f}")
+        st.markdown(report_md)
 
-# 欺诈检测模块
-elif mode == "🛡️ 欺诈检测":
-    st.header('🛡️ 欺诈检测')
-
-    # 上传CSV文件
-    uploaded_file = st.file_uploader("上传包含交易记录的CSV文件", type=["csv"])
-
-    if uploaded_file is not None:
-        data = pd.read_csv(uploaded_file)
-        st.write("数据预览:")
-        st.dataframe(data.head())
-
-        if 'fraud' not in data.columns:
-            st.error('CSV文件必须包含“fraud”列')
-        else:
-            X = data.drop('fraud', axis=1)
-            y = data['fraud']
-
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-            model = RandomForestClassifier()
-            model.fit(X_train, y_train)
-
-            y_pred = model.predict(X_test)
-            accuracy = accuracy_score(y_test, y_pred)
-
-            st.success(f"欺诈检测模型训练完成！准确率：{accuracy:.2%}")
-
-            # 显示欺诈检测预测结果
-            st.subheader("欺诈检测预测结果")
-
-            prediction_df = X_test.copy()
-            prediction_df['真实是否欺诈'] = y_test.values
-            prediction_df['预测是否欺诈'] = y_pred
-            prediction_df['预测结果'] = np.where(prediction_df['预测是否欺诈'] == 1, '欺诈', '正常')
-
-            display_df = prediction_df[['amount', '真实是否欺诈', '预测是否欺诈', '预测结果']]
-            st.write(display_df)
+        # 补充：下载按钮
+        csv_download = pd.DataFrame({'股票': tickers, '投资比例': best_weights})
+        st.download_button(label="下载投资方案CSV", data=csv_download.to_csv(index=False).encode('utf-8'), file_name='portfolio_recommendation.csv', mime='text/csv')
