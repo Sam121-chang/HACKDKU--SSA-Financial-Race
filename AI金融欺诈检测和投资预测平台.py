@@ -70,18 +70,20 @@ if mode == "📈 投资组合优化 (Portfolio Optimization)":
         # 获取收盘价数据 (Get closing prices)
         closing_prices = data['Close']
 
-        # 确保时间索引正确 (Ensure the time index is correct)
-        closing_prices = closing_prices.reset_index()  # 如果索引没有正确设置，重置索引
+        # 确保日期是索引 (Ensure the date is set as the index)
+        closing_prices = closing_prices.reset_index()
 
-        # 输出检查 (Check the data)
-        st.write(closing_prices.head())
-
-        # 确保数据格式正确 (Ensure data format)
+        # 确保只使用收盘价 (Ensure we only use the closing prices)
         if not closing_prices.empty:
-            # 使用Matplotlib绘制图表 (Use Matplotlib to plot the chart)
+            # 计算每日收益率 (Calculate daily returns)
+            returns = closing_prices.pct_change().dropna()
+
+            # 输出数据检查 (Check the returns data)
+            st.write(returns.head())
+
+            # 使用Matplotlib绘制图表 (Plot the chart using Matplotlib)
             st.subheader('股票价格走势 (Stock Price Trend)')
 
-            # 绘制股市走势图 (Plot the stock price trend)
             plt.figure(figsize=(10, 6))
             for stock in selected_stocks:
                 plt.plot(closing_prices['Date'], closing_prices[stock], label=stock)  # 绘制每只股票的收盘价
