@@ -160,11 +160,14 @@ elif mode == "🛡️ 欺诈检测 (Fraud Detection)":
             st.success(f"欺诈检测模型训练完成！准确率：{accuracy:.2%} (Fraud detection model trained! Accuracy: {accuracy:.2%})")
 
             # 显示欺诈检测预测结果 (Display fraud detection results)
-            st.subheader("欺诈检测预测结果 (Fraud Detection Predictions)")
+st.subheader("欺诈检测预测结果 (Fraud Detection Predictions)")
 
-            # 创建结果表格 (Create result dataframe)
-            prediction_df = X_test.copy()
-            prediction_df['真实是否欺诈 (Actual Fraud)'] = y_test.values
-            prediction_df['预测是否欺诈 (Predicted Fraud)'] = y_pred
-            prediction_df['预测结果 (Prediction Result)'] = np.where(
-                prediction_df['预测是否欺诈 (Predicted Fraud)'] == 1, '
+# 创建结果表格 (Create result dataframe)
+prediction_df = X_test.copy()
+prediction_df['真实是否欺诈 (Actual Fraud)'] = y_test.values
+prediction_df['预测是否欺诈 (Predicted Fraud)'] = y_pred
+prediction_df['预测结果 (Prediction Result)'] = np.where(
+    prediction_df['预测是否欺诈 (Predicted Fraud)'] == 1, '欺诈 (Fraud)', '非欺诈 (Non-Fraud)')
+
+# 显示预测结果 (Display prediction results)
+st.write(prediction_df)
