@@ -90,7 +90,3 @@ This project is licensed under **[MIT License](https://opensource.org/licenses/M
 
 ---
 
-> 提示：将`yourusername`替换为您的GitHub用户名  
-> Tip: Replace `yourusername` with your GitHub ID
-
----
