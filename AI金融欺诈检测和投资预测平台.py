@@ -9,7 +9,6 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
@@ -66,38 +65,9 @@ if mode == "📈 投资组合优化 (Portfolio Optimization)":
     if selected_stocks:
         # 下载股票数据 (Download stock data)
         data = yf.download(selected_stocks, start='2022-01-01', end='2024-01-01')
+        closing_prices = data['Close']  # 收盘价数据 (Closing prices)
 
-        # 获取收盘价数据 (Get closing prices)
-        closing_prices = data['Close']
-
-        # 确保日期是索引 (Ensure the date is set as the index)
-        closing_prices = closing_prices.reset_index()
-
-        # 确保只使用收盘价 (Ensure we only use the closing prices)
-        if not closing_prices.empty:
-            # 计算每日收益率 (Calculate daily returns)
-            returns = closing_prices.pct_change().dropna()
-
-            # 输出数据检查 (Check the returns data)
-            st.write(returns.head())
-
-            # 使用Matplotlib绘制图表 (Plot the chart using Matplotlib)
-            st.subheader('股票价格走势 (Stock Price Trend)')
-
-            plt.figure(figsize=(10, 6))
-            for stock in selected_stocks:
-                plt.plot(closing_prices['Date'], closing_prices[stock], label=stock)  # 绘制每只股票的收盘价
-
-            plt.title('股票价格走势图 (Stock Price Trend)')
-            plt.xlabel('日期 (Date)')
-            plt.ylabel('收盘价 (Closing Price)')
-            plt.legend()
-            plt.grid(True)
-
-            # 显示图表 (Show the chart)
-            st.pyplot(plt)
-        else:
-            st.error('无法加载股市数据，请检查股票代码或网络连接。')        # 计算每日收益率 (Calculate daily returns)
+        # 计算每日收益率 (Calculate daily returns)
         returns = closing_prices.pct_change().dropna()
 
         # 初始化Q-Learning智能体 (Initialize Q-Learning agent)
@@ -136,18 +106,20 @@ if mode == "📈 投资组合优化 (Portfolio Optimization)":
         st.subheader('投资优化组合结果 (Optimized Investment Portfolio)')
         st.table(pd.DataFrame(list(optimized_portfolio.items()), columns=["股票代码 (Stock)", "投资比例 (Investment Ratio)"]))
 
-        # 绘制投资分布饼图 (Plot investment distribution pie chart)
-        fig, ax = plt.subplots()
-        ax.pie(optimized_portfolio.values(), labels=optimized_portfolio.keys(), autopct='%1.1f%%', startangle=90)
-        ax.axis('equal')  # 保持饼图为正圆形 (Ensure pie is a circle)
-        st.pyplot(fig)
+        # 计算并显示投资组合的期望收益率和风险 (Calculate and display portfolio expected return and risk)
+        expected_return = calculate_portfolio_return(list(optimized_portfolio.values()), returns.mean())
+        portfolio_risk = np.sqrt(np.dot(list(optimized_portfolio.values()), np.dot(returns.cov(), list(optimized_portfolio.values()))))
+
+        st.subheader('投资组合统计分析 (Portfolio Statistics)')
+        st.write(f'期望年收益率: {expected_return:.2%}')  # Expected annual return
+        st.write(f'年化波动率 (风险): {portfolio_risk:.2%}')  # Annualized volatility (Risk)
 
         # 显示彩带 (Show balloons)
         st.balloons()
 
 # 欺诈检测模块 (Fraud Detection Module)
 elif mode == "🛡️ 欺诈检测 (Fraud Detection)":
-    st.header('🛡️ 欺诈检测 (Fraud Detection)')
+    st.header('🛡️ 欺诈检测 (Fra Fraud Detection)')
 
     # 上传CSV文件 (Upload CSV file)
     uploaded_file = st.file_uploader("上传包含交易记录的CSV文件 (Upload CSV file with transactions)", type=["csv"])
@@ -191,5 +163,6 @@ elif mode == "🛡️ 欺诈检测 (Fraud Detection)":
             display_df = prediction_df[['amount', '真实是否欺诈 (Actual Fraud)', '预测是否欺诈 (Predicted Fraud)',
                                         '预测结果 (Prediction Result)']]
 
+            st.dataframe(display_df)  # 显示欺诈检测预测表格
 
            
