@@ -1,5 +1,3 @@
-以下是为您的项目精心设计的README模板，结合黑客松评分标准和最佳实践：
-
 # AI金融欺诈检测与投资预测平台  
 **AI Financial Fraud Detection and Investment Prediction Platform**
 
