@@ -92,6 +92,12 @@ if mode == "📈 投资组合优化":
             
                 # 使用新的更新规则
                 q_table = q_learning_update(state, next_state, reward, q_table, learning_rate, discount_factor)
+
+            # 选择最佳的权重
+            best_state = np.argmax(q_table, axis=0)  # 每个资产的最佳状态
+            best_weights = np.array([actions[i] for i in best_state])
+            best_weights = best_weights / np.sum(best_weights)  # 确保权重和为1
+
             # 显示优化结果
             st.subheader('投资组合推荐')
 
