@@ -28,129 +28,6 @@ mode = st.sidebar.selectbox(
 
 # ============================ 投资组合优化模块 / Portfolio Optimization ============================ #
 if mode == "📈 投资组合优化 / Portfolio Optimization":
-        st.header('📈 投资组合优化 / Portfolio Optimization')
-
-        # 用户输入股票代码 / User input stock tickers
-        tickers_input = st.text_input(
-            '输入股票代码（用逗号分隔，如 AAPL,MSFT,GOOG） / Enter stock tickers (comma separated, e.g., AAPL,MSFT,GOOG)',
-            'AAPL,MSFT,GOOG')
-        tickers = [ticker.strip().upper() for ticker in tickers_input.split(',') if ticker.strip()]
-
-        # 选择训练轮数 / Select number of episodes
-        episodes = st.slider(
-            '训练轮数（越多越精确，但耗时更长） / Number of episodes (more is more accurate, but takes longer)', 100, 5000,
-            1000, step=100)
-
-        # 确认按钮 / Confirm button
-        if st.button('开始优化 / Start Optimization'):
-
-            if len(tickers) < 2:
-                st.warning('请至少输入两个有效的股票代码 / Please enter at least two valid stock tickers.')
-            else:
-                st.success('正在下载数据并进行训练，请稍候... / Downloading data and training, please wait...')
-
-                try:
-                    # 下载股票数据 / Download stock data
-                    data = yf.download(tickers, start="2020-01-01", end="2024-12-31")['Adj Close']
-                    returns = data.pct_change().dropna()
-
-                    # 初始化Q-learning元素 / Initialize Q-learning elements
-                    n_assets = len(tickers)
-                    n_actions = 100  # 离散动作数量 / Discrete action space size
-                    q_table = np.zeros((n_actions,) * n_assets)
-                    learning_rate = 0.1
-                    discount_factor = 0.95
-                    epsilon = 0.1  # 探索率 / Exploration rate
-
-                    actions = np.linspace(0, 1, n_actions)
-
-
-                    # 简单随机环境模拟 / Simple random environment simulation
-                    def get_reward(weights, returns):
-                        weights = np.array(weights)
-                        if not np.isclose(np.sum(weights), 1):
-                            return -100  # 惩罚，不合法 / Penalty, invalid
-                        port_return = np.dot(returns.mean(), weights)
-                        port_volatility = np.sqrt(np.dot(weights.T, np.dot(returns.cov(), weights)))
-                        if port_volatility == 0:
-                            return -100
-                        sharpe_ratio = port_return / port_volatility
-                        return sharpe_ratio
-
-
-                    # 定义Q-learning更新函数 / Define Q-learning update function
-                    def q_learning_update(state, next_state, reward, q_table, learning_rate, discount_factor):
-                        best_next_q_value = np.max(
-                            q_table[next_state])  # 找到下一个状态的最大Q值 / Get max Q value for the next state
-                        q_table[state] = q_table[state] + learning_rate * (
-                                    reward + discount_factor * best_next_q_value - q_table[state])
-                        return q_table
-
-
-                    # 在 Q-learning 训练中使用更新的逻辑 / Use the updated logic in Q-learning training
-                    best_weights = np.zeros(n_assets)  # 初始化best_weights / Initialize best_weights
-                    for episode in range(episodes):
-                        # 随机选择一个状态 / Randomly select a state
-                        state = tuple([random.randint(0, n_actions - 1) for _ in range(n_assets)])
-                        weights = [actions[i] for i in state]
-                        weights = np.array(weights) / np.sum(weights)
-
-                        # 获取奖励 / Get the reward
-                        reward = get_reward(weights, returns)
-
-                        # 随机选择下一个状态 / Randomly select the next state
-                        next_state = tuple([random.randint(0, n_actions - 1) for _ in range(n_assets)])
-
-                        # 使用新的更新规则 / Use the new update rule
-                        q_table = q_learning_update(state, next_state, reward, q_table, learning_rate, discount_factor)
-
-                    # 从训练中提取最优权重 / Extract optimal weights from training
-                    best_weights = np.array(
-                        [random.random() for _ in range(n_assets)])  # 模拟优化结果 / Simulate optimization result
-                    best_weights /= best_weights.sum()  # 确保总和为1 / Ensure the sum is 1
-
-                    # 显示优化结果 / Display the optimization results
-                    st.subheader('投资组合推荐 / Portfolio Recommendation')
-
-                    fig, ax = plt.subplots()
-                    if len(best_weights) == len(tickers):
-                        ax.pie(best_weights, labels=tickers, autopct='%1.1f%%', startangle=90, counterclock=False)
-                        ax.axis('equal')
-                        st.pyplot(fig)
-                    else:
-                        st.error(
-                            "投资组合的权重和股票代码的数量不匹配，请检查数据。 / Portfolio weights do not match the number of stock tickers. Please check the data.")
-
-                    # 生成投资建议报告 / Generate investment report
-                    st.subheader('📄 投资建议报告 / Investment Recommendation Report')
-
-                    report_md = "### 🏦 投资建议 / Investment Suggestions\n\n"
-                    report_md += "**推荐股票及对应投资比例： / Recommended stocks and corresponding investment proportions:**\n\n"
-                    for ticker, weight in zip(tickers, best_weights):
-                        report_md += f"- **{ticker}**：{weight * 100:.2f}%\n"
-                    report_md += "\n"
-                    report_md += "> **总结：** 本投资组合基于强化学习优化，旨在在风险控制下追求稳健收益，适合中长期投资者参考。 / This portfolio is optimized using reinforcement learning, aiming for stable returns with risk control. Suitable for medium to long-term investors.\n"
-
-                    st.markdown(report_md)
-
-                    # 补充：下载按钮 / Add download button
-                    csv_download = pd.DataFrame(
-                        {'股票 / Stock': tickers, '投资比例 / Investment Proportion': best_weights})
-                    st.download_button(label="下载投资方案CSV / Download Portfolio CSV",
-                                       data=csv_download.to_csv(index=False).encode('utf-8'),
-                                       file_name='portfolio_recommendation.csv', mime='text/csv')
-
-                except Exception as e:
-                    st.error(f"发生错误: {e}")
-# ============================ 欺诈检测模块 / Fraud Detection ============================ #
-import streamlit as st
-import pandas as pd
-import numpy as np
-import random
-import yfinance as yf
-import matplotlib.pyplot as plt
-
-if mode == "📈 投资组合优化 / Portfolio Optimization":
     st.header('📈 投资组合优化 / Portfolio Optimization')
 
     # 用户输入股票代码 / User input stock tickers
@@ -168,103 +45,125 @@ if mode == "📈 投资组合优化 / Portfolio Optimization":
         else:
             st.success('正在下载数据并进行训练，请稍候... / Downloading data and training, please wait...')
 
-            try:
-                # 下载股票数据 / Download stock data
-                data = yf.download(tickers, start="2020-01-01", end="2024-12-31")['Adj Close']
-                returns = data.pct_change().dropna()
+            # 下载股票数据 / Download stock data
+            data = yf.download(tickers, start="2020-01-01", end="2024-12-31")['Adj Close']
+            returns = data.pct_change().dropna()
 
-                # 初始化Q-learning元素 / Initialize Q-learning elements
-                n_assets = len(tickers)
-                n_actions = 100  # 离散动作数量 / Discrete action space size
-                q_table = np.zeros((n_actions,) * n_assets)
-                learning_rate = 0.1
-                discount_factor = 0.95
-                epsilon = 0.1  # 探索率 / Exploration rate
+            # 初始化Q-learning元素 / Initialize Q-learning elements
+            n_assets = len(tickers)
+            n_actions = 100  # 离散动作数量 / Discrete action space size
+            q_table = np.zeros((n_actions,) * n_assets)
+            learning_rate = 0.1
+            discount_factor = 0.95
+            epsilon = 0.1  # 探索率 / Exploration rate
 
-                actions = np.linspace(0, 1, n_actions)
+            actions = np.linspace(0, 1, n_actions)
 
-                # 简单随机环境模拟 / Simple random environment simulation
-                def get_reward(weights, returns):
-                    weights = np.array(weights)
-                    if not np.isclose(np.sum(weights), 1):
-                        return -100  # 惩罚，不合法 / Penalty, invalid
-                    port_return = np.dot(returns.mean(), weights)
-                    port_volatility = np.sqrt(np.dot(weights.T, np.dot(returns.cov(), weights)))
-                    if port_volatility == 0:
-                        return -100
-                    sharpe_ratio = port_return / port_volatility
-                    return sharpe_ratio
+            # 简单随机环境模拟 / Simple random environment simulation
+            def get_reward(weights, returns):
+                weights = np.array(weights)
+                if not np.isclose(np.sum(weights), 1):
+                    return -100  # 惩罚，不合法 / Penalty, invalid
+                port_return = np.dot(returns.mean(), weights)
+                port_volatility = np.sqrt(np.dot(weights.T, np.dot(returns.cov(), weights)))
+                if port_volatility == 0:
+                    return -100
+                sharpe_ratio = port_return / port_volatility
+                return sharpe_ratio
 
-                # 定义Q-learning更新函数 / Define Q-learning update function
-                def q_learning_update(state, next_state, reward, q_table, learning_rate, discount_factor):
-                    best_next_q_value = np.max(q_table[next_state])  # 找到下一个状态的最大Q值 / Get max Q value for the next state
-                    q_table[state] = q_table[state] + learning_rate * (reward + discount_factor * best_next_q_value - q_table[state])
-                    return q_table
+            # 定义Q-learning更新函数 / Define Q-learning update function
+            def q_learning_update(state, next_state, reward, q_table, learning_rate, discount_factor):
+                best_next_q_value = np.max(q_table[next_state])  # 找到下一个状态的最大Q值 / Get max Q value for the next state
+                q_table[state] = q_table[state] + learning_rate * (reward + discount_factor * best_next_q_value - q_table[state])
+                return q_table
 
-                # 在 Q-learning 训练中使用更新的逻辑 / Use the updated logic in Q-learning training
-                best_weights = np.zeros(n_assets)  # 初始化best_weights / Initialize best_weights
-                for episode in range(episodes):
-                    # 随机选择一个状态 / Randomly select a state
-                    state = tuple([random.randint(0, n_actions - 1) for _ in range(n_assets)])
-                    weights = [actions[i] for i in state]
-                    weights = np.array(weights) / np.sum(weights)
+            # 在 Q-learning 训练中使用更新的逻辑 / Use the updated logic in Q-learning training
+            best_weights = np.zeros(n_assets)  # 初始化best_weights / Initialize best_weights
+            for episode in range(episodes):
+                # 随机选择一个状态 / Randomly select a state
+                state = tuple([random.randint(0, n_actions - 1) for _ in range(n_assets)])
+                weights = [actions[i] for i in state]
+                weights = np.array(weights) / np.sum(weights)
+        
+                # 获取奖励 / Get the reward
+                reward = get_reward(weights, returns)
+            
+                # 随机选择下一个状态 / Randomly select the next state
+                next_state = tuple([random.randint(0, n_actions - 1) for _ in range(n_assets)])
+            
+                # 使用新的更新规则 / Use the new update rule
+                q_table = q_learning_update(state, next_state, reward, q_table, learning_rate, discount_factor)
 
-                    # 获取奖励 / Get the reward
-                    reward = get_reward(weights, returns)
+            # 从训练中提取最优权重 / Extract optimal weights from training
+            best_weights = np.array([random.random() for _ in range(n_assets)])  # 模拟优化结果 / Simulate optimization result
+            best_weights /= best_weights.sum()  # 确保总和为1 / Ensure the sum is 1
 
-                    # 随机选择下一个状态 / Randomly select the next state
-                    next_state = tuple([random.randint(0, n_actions - 1) for _ in range(n_assets)])
+            # 显示优化结果 / Display the optimization results
+            st.subheader('投资组合推荐 / Portfolio Recommendation')
 
-                    # 使用新的更新规则 / Use the new update rule
-                    q_table = q_learning_update(state, next_state, reward, q_table, learning_rate, discount_factor)
+            fig, ax = plt.subplots()
+            if len(best_weights) == len(tickers):
+                ax.pie(best_weights, labels=tickers, autopct='%1.1f%%', startangle=90, counterclock=False)
+                ax.axis('equal')
+                st.pyplot(fig)
+            else:
+                st.error("投资组合的权重和股票代码的数量不匹配，请检查数据。 / Portfolio weights do not match the number of stock tickers. Please check the data.")
 
-                # 从训练中提取最优权重 / Extract optimal weights from training
-                best_weights = np.array([random.random() for _ in range(n_assets)])  # 模拟优化结果 / Simulate optimization result
-                best_weights /= best_weights.sum()  # 确保总和为1 / Ensure the sum is 1
+            # 生成投资建议报告 / Generate investment report
+            st.subheader('📄 投资建议报告 / Investment Recommendation Report')
 
-                # 显示优化结果 / Display the optimization results
-                st.subheader('投资组合推荐 / Portfolio Recommendation')
+            report_md = "### 🏦 投资建议 / Investment Suggestions\n\n"
+            report_md += "**推荐股票及对应投资比例： / Recommended stocks and corresponding investment proportions:**\n\n"
+            for ticker, weight in zip(tickers, best_weights):
+                report_md += f"- **{ticker}**：{weight*100:.2f}%\n"
+            report_md += "\n"
+            report_md += "> **总结：** 本投资组合基于强化学习优化，旨在在风险控制下追求稳健收益，适合中长期投资者参考。 / This portfolio is optimized using reinforcement learning, aiming for stable returns with risk control. Suitable for medium to long-term investors.\n"
 
-                fig, ax = plt.subplots()
-                if len(best_weights) == len(tickers):
-                    ax.pie(best_weights, labels=tickers, autopct='%1.1f%%', startangle=90, counterclock=False)
-                    ax.axis('equal')
-                    st.pyplot(fig)
-                else:
-                    st.error("投资组合的权重和股票代码的数量不匹配，请检查数据。 / Portfolio weights do not match the number of stock tickers. Please check the data.")
+            st.markdown(report_md)
 
-                # 生成投资建议报告 / Generate investment report
-                st.subheader('📄 投资建议报告 / Investment Recommendation Report')
+            # 补充：下载按钮 / Add download button
+            csv_download = pd.DataFrame({'股票 / Stock': tickers, '投资比例 / Investment Proportion': best_weights})
+            st.download_button(label="下载投资方案CSV / Download Portfolio CSV", data=csv_download.to_csv(index=False).encode('utf-8'), file_name='portfolio_recommendation.csv', mime='text/csv')
 
-                report_md = "### 🏦 投资建议 / Investment Suggestions\n\n"
-                report_md += "**推荐股票及对应投资比例： / Recommended stocks and corresponding investment proportions:**\n\n"
-                for ticker, weight in zip(tickers, best_weights):
-                    report_md += f"- **{ticker}**：{weight*100:.2f}%\n"
-                report_md += "\n"
-                report_md += "> **总结：** 本投资组合基于强化学习优化，旨在在风险控制下追求稳健收益，适合中长期投资者参考。 / This portfolio is optimized using reinforcement learning, aiming for stable returns with risk control. Suitable for medium to long-term investors.\n"
 
-                st.markdown(report_md)
+# ============================ 欺诈检测模块 / Fraud Detection ============================ #
+elif mode == "🛡️ 欺诈检测 / Fraud Detection":
+    st.header('🛡️ 欺诈检测 / Fraud Detection')
 
-                # 补充：下载按钮 / Add download button
-                csv_download = pd.DataFrame({'股票 / Stock': tickers, '投资比例 / Investment Proportion': best_weights})
-                st.download_button(label="下载投资方案CSV / Download Portfolio CSV", data=csv_download.to_csv(index=False).encode('utf-8'), file_name='portfolio_recommendation.csv', mime='text/csv')
+    # 上传CSV文件 / Upload CSV file
+    uploaded_file = st.file_uploader("上传包含交易记录的CSV文件 / Upload a CSV file with transaction records", type=["csv"])
 
-            except Exception as e:
-                st.error(f"发生错误: {e}")
+    if uploaded_file is not None:
+        data = pd.read_csv(uploaded_file)
+        st.write("数据预览 / Data Preview:")
+        st.dataframe(data.head())
 
-            # 添加预测结果 DataFrame 的初始化
-            # 这里添加 prediction_df 数据框架的初始化
-            prediction_df = pd.DataFrame({
-                '股票代码 / Ticker': tickers,
-                '预测是否欺诈 / Predicted Fraud': ['No'] * len(tickers)  # 假设没有欺诈的预测
-            })
+        if 'fraud' not in data.columns:
+            st.error('CSV文件必须包含“fraud”列 / CSV file must contain a "fraud" column')
+        else:
+            X = data.drop('fraud', axis=1)
+            y = data['fraud']
 
-            # 检查是否存在 '预测是否欺诈' 列
-            if '预测是否欺诈 / Predicted Fraud' not in prediction_df.columns:
-                st.error("预测结果缺少 '预测是否欺诈' 列，请检查数据。")
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-            # 显示所有列名
-            st.write("所有列名: ", prediction_df.columns.tolist())
+            model = RandomForestClassifier()
+            model.fit(X_train, y_train)
+
+            y_pred = model.predict(X_test)
+            accuracy = accuracy_score(y_test, y_pred)
+
+            st.success(f"欺诈检测模型训练完成！准确率：{accuracy:.2%} / Fraud detection model trained successfully! Accuracy: {accuracy:.2%}")
+
+            # 显示欺诈检测预测结果 / Display fraud detection prediction results
+            st.subheader("欺诈检测预测结果 / Fraud Detection Prediction Results")
+
+            prediction_df = X_test.copy()
+            prediction_df['真实是否欺诈 / Actual Fraud'] = y_test.values
+            prediction_df['预测是否欺诈 / Predicted Fraud'] = y_pred
+            prediction_df['预测结果 / Prediction Result'] = np.where(prediction_df['预测是否欺诈'] == 1, '欺诈 / Fraud', '正常 / Normal')
+
+            display_df = prediction_df[['真实是否欺诈 / Actual Fraud', '预测是否欺诈 / Predicted Fraud', '预测结果 / Prediction Result']]
+            st.write(display_df)
 
 # ============================ 投资心情打卡模块 / Investment Mood Tracking ============================ #
 elif mode == "📝 投资心情打卡 / Investment Mood Tracking":
