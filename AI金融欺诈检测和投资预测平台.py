@@ -154,30 +154,32 @@ elif mode == "🛡️ 欺诈检测 / Fraud Detection":
 
             st.success(f"欺诈检测模型训练完成！准确率：{accuracy:.2%} / Fraud detection model trained successfully! Accuracy: {accuracy:.2%}")
 
-            # 显示欺诈检测预测结果 / Display fraud detection prediction results
-            st.subheader("欺诈检测预测结果 / Fraud Detection Prediction Results")
-        
-            # 检查并打印所有列名，确保列名正确
-            st.write("所有列名: ", prediction_df.columns.tolist())
-        
+            # 确保 prediction_df 已定义且为有效的 DataFrame
+            try:
+                # 打印列名之前，检查 prediction_df 是否为 DataFrame 类型
+                if isinstance(prediction_df, pd.DataFrame):
+                    st.write("所有列名: ", prediction_df.columns.tolist())
+                else:
+                    st.error("prediction_df 不是一个有效的 DataFrame。请检查数据加载过程。")
+            except Exception as e:
+                st.error(f"出现错误: {e}")
+            
             # 确保预测结果列正确存在，不存在时创建
             if '预测是否欺诈 / Predicted Fraud' not in prediction_df.columns:
                 st.warning("未找到 '预测是否欺诈 / Predicted Fraud' 列，正在创建该列...")
                 prediction_df['预测是否欺诈 / Predicted Fraud'] = y_pred  # 使用模型预测值填充
-        
+            
             # 确保 '预测是否欺诈 / Predicted Fraud' 列正确
             if '预测是否欺诈 / Predicted Fraud' in prediction_df.columns:
                 st.write("已找到 '预测是否欺诈 / Predicted Fraud' 列。")
             else:
                 st.error("未能找到 '预测是否欺诈 / Predicted Fraud' 列，请检查代码。")
-        
+            
             # 计算预测结果列 / Compute prediction result column
-            prediction_df['预测结果 / Prediction Result'] = np.where(prediction_df['预测是否欺诈 / Predicted Fraud'] == 1,
-                                                                     '欺诈 / Fraud', '正常 / Normal')
-        
+            prediction_df['预测结果 / Prediction Result'] = np.where(prediction_df['预测是否欺诈 / Predicted Fraud'] == 1, '欺诈 / Fraud', '正常 / Normal')
+            
             # 显示最终的结果表格
-            display_df = prediction_df[
-                ['真实是否欺诈 / Actual Fraud', '预测是否欺诈 / Predicted Fraud', '预测结果 / Prediction Result']]
+            display_df = prediction_df[['真实是否欺诈 / Actual Fraud', '预测是否欺诈 / Predicted Fraud', '预测结果 / Prediction Result']]
             st.write(display_df)
 # ============================ 投资心情打卡模块 / Investment Mood Tracking ============================ #
 elif mode == "📝 投资心情打卡 / Investment Mood Tracking":
