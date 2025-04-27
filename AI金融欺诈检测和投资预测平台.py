@@ -71,22 +71,27 @@ if mode == "📈 投资组合优化":
                 sharpe_ratio = port_return / port_volatility
                 return sharpe_ratio
 
-            # Q-learning训练
+            # 定义Q-learning更新函数
+            def q_learning_update(state, next_state, reward, q_table, learning_rate, discount_factor):
+                best_next_q_value = np.max(q_table[next_state])  # 找到下一个状态的最大Q值
+                q_table[state] = q_table[state] + learning_rate * (reward + discount_factor * best_next_q_value - q_table[state])
+                return q_table
+
+            # 在 Q-learning 训练中使用更新的逻辑
             for episode in range(episodes):
+                # 随机选择一个状态
                 state = tuple([random.randint(0, n_actions - 1) for _ in range(n_assets)])
                 weights = [actions[i] for i in state]
                 weights = np.array(weights) / np.sum(weights)
-
+        
+                # 获取奖励
                 reward = get_reward(weights, returns)
-
+            
+                # 随机选择下一个状态
                 next_state = tuple([random.randint(0, n_actions - 1) for _ in range(n_assets)])
-                q_table[state] = q_table[state] + learning_rate * (reward + discount_factor * np.max(q_table[next_state]) - q_table[state])
-
-            # 找到最优权重
-            best_state = np.unravel_index(np.argmax(q_table), q_table.shape)
-            best_weights = [actions[i] for i in best_state]
-            best_weights = np.array(best_weights) / np.sum(best_weights)
-
+            
+                # 使用新的更新规则
+                q_table = q_learning_update(state, next_state, reward, q_table, learning_rate, discount_factor)
             # 显示优化结果
             st.subheader('投资组合推荐')
 
