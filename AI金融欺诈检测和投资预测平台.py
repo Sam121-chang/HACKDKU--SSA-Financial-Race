@@ -143,19 +143,20 @@ if mode == "📈 投资组合优化 / Portfolio Optimization":
                 except Exception as e:
                     st.error(f"发生错误: {e}")
 # ============================ 欺诈检测模块 / Fraud Detection ============================ #
-elif mode == "🛡️ 欺诈检测 / Fraud Detection":
-    st.header('🛡️ 欺诈检测 / Fraud Detection')
+# 欺诈检测模块
+elif mode == "🛡️ 欺诈检测":
+    st.header('🛡️ 欺诈检测')
 
-    # 上传CSV文件 / Upload CSV file
-    uploaded_file = st.file_uploader("上传包含交易记录的CSV文件 / Upload a CSV file with transaction records", type=["csv"])
+    # 上传CSV文件
+    uploaded_file = st.file_uploader("上传包含交易记录的CSV文件", type=["csv"])
 
     if uploaded_file is not None:
         data = pd.read_csv(uploaded_file)
-        st.write("数据预览 / Data Preview:")
+        st.write("数据预览:")
         st.dataframe(data.head())
 
         if 'fraud' not in data.columns:
-            st.error('CSV文件必须包含“fraud”列 / CSV file must contain a "fraud" column')
+            st.error('CSV文件必须包含“fraud”列')
         else:
             X = data.drop('fraud', axis=1)
             y = data['fraud']
@@ -168,36 +169,27 @@ elif mode == "🛡️ 欺诈检测 / Fraud Detection":
             y_pred = model.predict(X_test)
             accuracy = accuracy_score(y_test, y_pred)
 
-            st.success(f"欺诈检测模型训练完成！准确率：{accuracy:.2%} / Fraud detection model trained successfully! Accuracy: {accuracy:.2%}")
+            st.success(f"欺诈检测模型训练完成！准确率：{accuracy:.2%}")
 
-            # 确保 prediction_df 已定义且为有效的 DataFrame
-            try:
-                # 打印列名之前，检查 prediction_df 是否为 DataFrame 类型
-                if isinstance(prediction_df, pd.DataFrame):
-                    st.write("所有列名: ", prediction_df.columns.tolist())
-                else:
-                    st.error("prediction_df 不是一个有效的 DataFrame。请检查数据加载过程。")
-            except Exception as e:
-                st.error(f"出现错误: {e}")
-            
-            # 确保预测结果列正确存在，不存在时创建
-            if '预测是否欺诈 / Predicted Fraud' not in prediction_df.columns:
-                st.warning("未找到 '预测是否欺诈 / Predicted Fraud' 列，正在创建该列...")
-                prediction_df['预测是否欺诈 / Predicted Fraud'] = y_pred  # 使用模型预测值填充
-            
-            # 确保 '预测是否欺诈 / Predicted Fraud' 列正确
-            if '预测是否欺诈 / Predicted Fraud' in prediction_df.columns:
-                st.write("已找到 '预测是否欺诈 / Predicted Fraud' 列。")
-            else:
-                st.error("未能找到 '预测是否欺诈 / Predicted Fraud' 列，请检查代码。")
-            
-            # 计算预测结果列 / Compute prediction result column
+            # 显示欺诈检测预测结果
+            st.subheader("欺诈检测预测结果")
+
+            prediction_df = X_test.copy()
+            prediction_df['真实是否欺诈 / Actual Fraud'] = y_test.values
+            prediction_df['预测是否欺诈 / Predicted Fraud'] = y_pred
             prediction_df['预测结果 / Prediction Result'] = np.where(prediction_df['预测是否欺诈 / Predicted Fraud'] == 1, '欺诈 / Fraud', '正常 / Normal')
-            
-            # 显示最终的结果表格
+
             display_df = prediction_df[['真实是否欺诈 / Actual Fraud', '预测是否欺诈 / Predicted Fraud', '预测结果 / Prediction Result']]
             st.write(display_df)
-# ============================ 投资心情打卡模块 / Investment Mood Tracking ============================ #
+
+            # 增加一个条件判断，确保prediction_df存在
+            if '预测是否欺诈 / Predicted Fraud' in prediction_df.columns:
+                # 在这里添加你原本要执行的代码
+                pass
+            else:
+                st.error("预测数据框中缺少必要的列")
+    else:
+        st.warning("请上传包含交易记录的CSV文件")# ============================ 投资心情打卡模块 / Investment Mood Tracking ============================ #
 elif mode == "📝 投资心情打卡 / Investment Mood Tracking":
     st.header('📝 投资心情打卡 / Investment Mood Tracking')
 
