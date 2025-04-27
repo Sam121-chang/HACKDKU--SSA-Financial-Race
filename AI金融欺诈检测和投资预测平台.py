@@ -156,16 +156,28 @@ elif mode == "🛡️ 欺诈检测 / Fraud Detection":
 
             # 显示欺诈检测预测结果 / Display fraud detection prediction results
             st.subheader("欺诈检测预测结果 / Fraud Detection Prediction Results")
-            
-            # 检查是否存在 '预测是否欺诈' 列，如果没有则进行修复
+        
+            # 检查并打印所有列名，确保列名正确
+            st.write("所有列名: ", prediction_df.columns.tolist())
+        
+            # 确保预测结果列正确存在，不存在时创建
             if '预测是否欺诈 / Predicted Fraud' not in prediction_df.columns:
-                prediction_df['预测是否欺诈 / Predicted Fraud'] = y_pred
-            
-            # 检查 '预测是否欺诈' 是否为 1，若是则标记为欺诈 / Fraud，否则为正常 / Normal
-            prediction_df['预测结果 / Prediction Result'] = np.where(prediction_df['预测是否欺诈 / Predicted Fraud'] == 1, '欺诈 / Fraud', '正常 / Normal')
-            
+                st.warning("未找到 '预测是否欺诈 / Predicted Fraud' 列，正在创建该列...")
+                prediction_df['预测是否欺诈 / Predicted Fraud'] = y_pred  # 使用模型预测值填充
+        
+            # 确保 '预测是否欺诈 / Predicted Fraud' 列正确
+            if '预测是否欺诈 / Predicted Fraud' in prediction_df.columns:
+                st.write("已找到 '预测是否欺诈 / Predicted Fraud' 列。")
+            else:
+                st.error("未能找到 '预测是否欺诈 / Predicted Fraud' 列，请检查代码。")
+        
+            # 计算预测结果列 / Compute prediction result column
+            prediction_df['预测结果 / Prediction Result'] = np.where(prediction_df['预测是否欺诈 / Predicted Fraud'] == 1,
+                                                                     '欺诈 / Fraud', '正常 / Normal')
+        
             # 显示最终的结果表格
-            display_df = prediction_df[['真实是否欺诈 / Actual Fraud', '预测是否欺诈 / Predicted Fraud', '预测结果 / Prediction Result']]
+            display_df = prediction_df[
+                ['真实是否欺诈 / Actual Fraud', '预测是否欺诈 / Predicted Fraud', '预测结果 / Prediction Result']]
             st.write(display_df)
 # ============================ 投资心情打卡模块 / Investment Mood Tracking ============================ #
 elif mode == "📝 投资心情打卡 / Investment Mood Tracking":
